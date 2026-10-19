@@ -1,0 +1,3 @@
+*.bat text eol=crlf
+# シナリオ（Shift_JIS・CRLF）は改行を変換しない
+*.dat -text

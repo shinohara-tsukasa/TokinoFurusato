@@ -1,0 +1,46 @@
+<html><head>
+<meta charset="utf-8">
+<title>時の故郷外伝・他</title>
+<script>
+const icn3=new Image(72,39);
+const icn4=new Image(72,39);
+icn3.src="menu2.jpg";
+icn4.src="menu.jpg";
+</script>
+<STYLE type="text/css">
+        a {text-decoration:none;}
+        a:hover{text-decoration:underline;color:#00aa00;font-weight:bold;}
+</STYLE>
+</head>
+<BODY TEXT="#000000" LINK="#006600" VLINK="#004400" bgcolor="#ffffff" background="bg.jpg">
+<basefont size=3>
+<table border=0 cellpadding=0 cellspacing=0 width=90%>
+<tr><td width=50 rowspan=3><img src="blank.gif" width=50 height=1></td>
+<td valign=top><img src="title.jpg" width=509 height=64></td></tr>
+<tr><td>
+<hr width=40% align=left>
+<i>2003/8/29-9/1</i><br>
+<a href="time3g1-01.htm">時の故郷　外伝～受け継がれる思い（全５話）</a><br><br>
+<i>2003/12/16-2004/1/8</i><br>
+<a href="time3g2-01.htm">時の故郷　外伝２（全６話）</a><br><br>
+<hr width=40% align=left>
+
+<a href="../main.htm" target="MAIN" onmouseover="chg10()" onmouseout="chg11()"><img src="menu.jpg" name="MENU" border=0 width=72 height=39></a>
+</td></tr>
+
+</table>
+
+<script>
+function chg10()
+    {
+    const el=document.querySelector('[name="MENU"]');
+    if(el) el.src=icn3.src;
+    }
+function chg11()
+    {
+    const el=document.querySelector('[name="MENU"]');
+    if(el) el.src=icn4.src;
+    }
+</script>
+</BODY>
+</HTML>

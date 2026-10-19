@@ -1,0 +1,2074 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>時の故郷 3.11 完全版</title>
+<link rel="stylesheet" href="debug_console.css?v=5.6.12">
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+}
+body {
+  color: #fff;
+  font-family: "MS PGothic", "Yu Gothic", Meiryo, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#stage {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #000;
+}
+.screen {
+  position: relative;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+/* v5.6.19: launch notice. The boot BGM may only start after a user gesture,
+   so the first screen waits for the "ゲームスタート" button. */
+#launch-notice {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: #000;
+}
+#launch-notice[hidden] { display: none; }
+.launch-notice-band {
+  width: 100%;
+  padding: 26px 16px 24px;
+  border-top: 1px solid #777;
+  border-bottom: 1px solid #777;
+  background: linear-gradient(to bottom, #161616, #060606);
+  text-align: center;
+}
+#launch-notice-text {
+  max-width: 46em;
+  margin: 0 auto 18px;
+  font-size: 15px;
+  line-height: 1.9;
+}
+#launch-start-button {
+  width: auto;
+  min-width: 168px;
+  padding: 4px 22px;
+}
+#boot-screen {
+  width: 240px;
+  height: 320px;
+  background: #000 url("assets/boot.jpg") no-repeat 0 0 / 240px 320px;
+}
+#boot-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: bold 24px/1.2 "Times New Roman", serif;
+  opacity: 1;
+  transition: opacity 2s linear;
+  pointer-events: none;
+}
+#boot-ui {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 68px auto 1fr;
+  padding: 0 4px 4px 4px;
+  text-align: center;
+  text-shadow: 0 0 3px #000, 0 0 3px #000;
+  opacity: 0;
+  transition: opacity 2s linear;
+}
+#boot-screen.boot-ready #boot-loading { opacity: 0; }
+#boot-screen.boot-ready #boot-ui { opacity: 1; }
+.boot-title {
+  align-self: end;
+  font: bold 24px/1.15 "Times New Roman", serif;
+}
+.boot-version {
+  text-align: right;
+  padding-right: 2px;
+  font: bold 14px/1.2 "Times New Roman", serif;
+}
+.boot-buttons {
+  align-self: end;
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  padding-bottom: 2px;
+}
+.boot-button {
+  width: 120px;
+  min-height: 27px;
+  border: 1px solid #777;
+  background: #000;
+  color: #fff;
+  font: bold 16px/1.2 "Times New Roman", "MS PGothic", serif;
+  cursor: pointer;
+  padding: 3px;
+}
+.boot-button:hover, .boot-button:focus-visible {
+  color: #ffff88;
+  border-color: #ddd;
+  outline: none;
+}
+#game-screen {
+  display: none;
+  width: 640px;
+  height: 480px;
+  background: #000;
+}
+#title-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: url("assets/tback.jpg") no-repeat 0 0 / 640px 480px;
+  pointer-events: none;
+}
+#game-ui {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  text-align: center;
+  text-shadow: 0 0 2px #000, 0 0 3px #000;
+}
+#game-screen.title-preparing #title-background,
+#game-screen.title-preparing #game-ui {
+  opacity: 0;
+  transition: none;
+}
+#game-screen.title-fading #title-background,
+#game-screen.title-fading #game-ui {
+  opacity: 1;
+  transition: opacity var(--title-fade-seconds, 2s) linear;
+}
+.title-hotspot{position:absolute;z-index:2;border:0;padding:0;background:transparent;cursor:default}
+.title-hotspot:focus-visible{outline:1px dotted #ffff88}
+#title-cat-hotspot{right:0;bottom:0;width:32px;height:32px}
+#title-face-hotspot{left:475px;top:85px;width:82px;height:85px}
+#title-stack {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+#title-pre-spacer,
+#title-main-gap,
+#title-post-spacer,
+#title-tail-spacer {
+  display: block;
+  width: 1px;
+  flex: 0 0 auto;
+}
+#title-main-gap { height: 20px; }
+#title-tail-spacer { height: 36px; }
+#title-logo {
+  display: block;
+  width: 256px;
+  height: 77px;
+  flex: 0 0 auto;
+}
+.version {
+  display: block;
+  height: 14px;
+  line-height: 14px;
+  font-size: 12px;
+  font-weight: bold;
+  margin: 0;
+  flex: 0 0 auto;
+}
+#title-menu-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 auto;
+}
+.title-menu {
+  color: #ffff88;
+  font-family: "MS PMincho", "Yu Mincho", serif;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 21px;
+  cursor: pointer;
+  padding: 0 8px;
+  margin: 0 0 6px;
+  flex: 0 0 auto;
+}
+.title-menu:last-child {
+  margin-bottom: 0;
+}
+.title-menu:hover, .title-menu:focus-visible {
+  color: #fff4b0;
+  text-shadow: 0 0 4px #000, 0 0 6px #ffff88;
+  outline: none;
+}
+#help-note {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+#demo-status {
+  display: none !important;
+}
+#debug-badge{
+  display:none !important;
+}
+#debug-badge[hidden]{display:none}
+.debug-panel{
+  position:absolute;
+  left:45px;
+  top:26px;
+  width:550px;
+  height:420px;
+  padding:12px 16px;
+  box-sizing:border-box;
+  border:1px solid #ffcc66;
+  background:rgba(0,0,0,.90);
+  overflow-y:auto;
+  text-align:left;
+}
+.debug-panel h2{margin:0 0 5px;color:#ffdd88;font-size:20px}
+.debug-panel .debug-note{font-size:12px;line-height:1.5;margin-bottom:10px}
+.debug-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4px 8px;
+}
+.debug-omake-btn{
+  border:1px solid #777;
+  background:#111;
+  color:#fff;
+  padding:5px 7px;
+  cursor:pointer;
+  text-align:left;
+  font:13px/1.3 sans-serif;
+}
+.debug-omake-btn:hover{border-color:#ffcc66;color:#ffdd88}
+.debug-actions{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin:10px 0;
+}
+.debug-action-btn{
+  border:1px solid #aaa;
+  background:#171717;
+  color:#fff;
+  padding:5px 9px;
+  cursor:pointer;
+}
+.debug-action-btn:hover{color:#ffdd88;border-color:#ffcc66}
+
+#cg-viewer{
+  position:absolute;
+  inset:0;
+  width:640px;
+  height:480px;
+  overflow:hidden;
+  background:#000 url("../bg/60.jpg") 0 0 / 640px 480px no-repeat;
+  color:#fff;
+  text-shadow:0 0 3px #000;
+}
+#cg-title{
+  position:absolute;
+  left:150px;
+  top:0;
+  z-index:2;
+}
+#cg-grid{
+  position:absolute;
+  left:4px;
+  top:80px;
+  z-index:2;
+  display:grid;
+  grid-template-columns:repeat(5,120px);
+  grid-template-rows:repeat(3,90px);
+  gap:6px;
+}
+.cg-thumb{
+  width:120px;
+  height:90px;
+  display:block;
+  border:0;
+  padding:0;
+  margin:0;
+  object-fit:cover;
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+.cg-thumb.locked{cursor:default}
+#cg-label-back{
+  position:absolute;
+  left:10px;
+  top:408px;
+  z-index:2;
+  width:404px;
+  height:42px;
+  box-sizing:border-box;
+  border:2px solid rgba(255,255,255,.7);
+  background:rgba(0,0,0,.55);
+  pointer-events:none;
+}
+#cg-label{
+  position:absolute;
+  left:22px;
+  top:418px;
+  z-index:3;
+  height:30px;
+  font-size:24px;
+  line-height:28px;
+  color:#fff;
+  font-weight:bold;
+  white-space:nowrap;
+  pointer-events:none;
+}
+#cg-return{
+  position:absolute;
+  left:540px;
+  top:430px;
+  z-index:3;
+  width:80px;
+  height:32px;
+  cursor:pointer;
+}
+#cg-full{
+  position:absolute;
+  inset:0;
+  z-index:20;
+  width:640px;
+  height:480px;
+  overflow:hidden;
+  background:#000;
+}
+#cg-full[hidden]{display:none}
+.cg-full-layer{
+  position:absolute;
+  inset:0;
+  width:640px;
+  height:480px;
+  object-fit:cover;
+  opacity:0;
+  transition:opacity .8s linear;
+  -webkit-user-drag:none;
+  user-select:none;
+}
+.cg-full-layer.active{opacity:1}
+#cg-full-click{
+  position:absolute;
+  inset:0;
+  z-index:5;
+  width:640px;
+  height:480px;
+  cursor:pointer;
+  background:transparent;
+}
+#cg-counter{
+  position:absolute;
+  right:8px;
+  bottom:6px;
+  z-index:6;
+  padding:2px 5px;
+  font:bold 11px/1.2 monospace;
+  color:#fff;
+  background:rgba(0,0,0,.45);
+  pointer-events:none;
+}
+
+#music-viewer{
+  position:absolute;
+  inset:0;
+  width:640px;
+  height:480px;
+  overflow:hidden;
+  background:#000 url("../bg/05.jpg") 0 0 / 640px 480px no-repeat;
+  color:#fff;
+  text-align:left;
+  font-family:"MS PGothic","Yu Gothic",sans-serif;
+}
+#music-num{
+  position:absolute;
+  top:100px;
+  left:120px;
+  z-index:2;
+  font-size:16px;
+  font-weight:bold;
+  color:#fff;
+  text-shadow:2px 2px 0 #000;
+  white-space:nowrap;
+}
+#music-name{
+  position:absolute;
+  top:130px;
+  left:120px;
+  z-index:2;
+  font-size:36px;
+  line-height:1.15;
+  font-weight:bold;
+  color:#fff;
+  text-shadow:2px 3px 0 #000;
+  white-space:nowrap;
+}
+#music-credit{
+  position:absolute;
+  top:210px;
+  left:120px;
+  z-index:2;
+  font-size:16px;
+  font-weight:bold;
+  color:#fff;
+  text-shadow:2px 2px 0 #000;
+  white-space:nowrap;
+}
+#music-scene{
+  position:absolute;
+  top:230px;
+  left:120px;
+  z-index:2;
+  font-size:16px;
+  font-weight:bold;
+  color:#fff;
+  text-shadow:2px 2px 0 #000;
+  white-space:nowrap;
+}
+#music-comment{
+  position:absolute;
+  top:320px;
+  left:120px;
+  width:500px;
+  z-index:2;
+  font-size:16px;
+  line-height:1.45;
+  font-weight:bold;
+  color:#fff;
+  text-shadow:2px 2px 0 #000;
+}
+#music-panel{
+  position:absolute;
+  left:180px;
+  top:430px;
+  z-index:3;
+  display:flex;
+  background:#000;
+  border:2px outset #aaa;
+}
+.music-panel-btn{
+  display:block;
+  width:80px;
+  height:32px;
+  padding:0;
+  margin:0;
+  border:0;
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+.music-panel-btn:hover{
+  filter:brightness(1.15);
+}
+#music-status{
+  position:absolute;
+  right:10px;
+  top:8px;
+  z-index:3;
+  padding:2px 5px;
+  background:rgba(0,0,0,.45);
+  color:#fff;
+  font:bold 11px/1.2 monospace;
+}
+#title-special{
+  position:absolute;
+  inset:0;
+  z-index:60;
+  width:640px;
+  height:480px;
+  overflow:hidden;
+  background:#000;
+  color:#fff;
+  text-shadow:0 0 3px #000;
+}
+#title-special[hidden]{display:none}
+#title-special-panel{
+  position:absolute;
+  inset:0;
+  width:640px;
+  height:480px;
+  background-position:0 0;
+  background-repeat:no-repeat;
+  background-size:640px 480px;
+}
+.special-title-image{position:absolute;left:0;right:0;top:0;text-align:center}
+.special-return{position:absolute;right:35px;bottom:10px;cursor:pointer}
+.special-scroll{
+  position:absolute;
+  left:100px;
+  top:150px;
+  width:466px;
+  height:280px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:6px 10px;
+  border:2px solid rgba(255,255,255,.35);
+  background:rgba(0,0,0,.55);
+  font-weight:bold;
+  line-height:24px;
+  text-align:left;
+}
+/* v5.6.24: the note sat on the right half of the 454x96 sign (top 48px) and,
+   being only 245px wide, wrapped onto two lines. It now sits on one line in the
+   gap between the sign (bottom 96px) and the list (top 150px), right-aligned
+   with the list's right edge as before (640 - 566 = 74px). */
+.special-ending-note{
+  position:absolute;
+  top:124px;
+  right:74px;
+  font-size:12px;
+  line-height:16px;
+  font-weight:bold;
+  text-align:right;
+  white-space:nowrap;
+}
+/* v5.6.22: hidden 攻略ジャンプ (title: hold J + P) */
+.jump-head{position:absolute;left:0;right:0;top:22px;text-align:center;font:bold 28px/1.2 "MS PMincho","Yu Mincho",serif}
+.jump-note{position:absolute;left:40px;right:40px;top:62px;font-size:12px;font-weight:bold;text-align:center;line-height:1.5;white-space:pre-line}
+.jump-list{position:absolute;left:44px;top:104px;width:552px;height:322px;overflow-y:auto;overflow-x:hidden;
+  padding:4px 8px;border:2px solid rgba(255,255,255,.35);background:rgba(0,0,0,.6)}
+.jump-part{margin:6px 0 2px;color:#bbb;font-size:12px;font-weight:bold}
+.jump-row{display:block;width:100%;margin:0;padding:3px 4px;border:0;background:transparent;color:#ffffaa;
+  font:inherit;text-align:left;text-shadow:inherit;cursor:pointer}
+.jump-row:hover,.jump-row:focus-visible{color:#fff;background:rgba(255,255,255,.12);outline:none}
+.jump-row b{font-size:17px}
+.jump-row small{display:block;padding-left:1.6em;color:#ddddff;font-size:12px;font-weight:bold}
+.jump-row:hover small,.jump-row:focus-visible small{color:#fff}
+.end-none,.end-bad,.end-good{font-size:20px;font-weight:bold;display:block;white-space:nowrap}
+.end-none{color:#fff}
+.end-bad{color:#ddddff}
+.end-good{color:#ffffaa;cursor:pointer}
+.end-good:hover{color:#fff}
+.kid-table{width:100%;border-collapse:collapse;font-size:16px}
+.kid-table th,.kid-table td{border:1px solid rgba(255,255,255,.45);padding:3px 5px}
+.kid-table td:nth-child(2),.kid-table td:nth-child(3){text-align:right}
+.title-config-box{
+  position:absolute;
+  left:120px;
+  top:80px;
+  width:400px;
+  padding:20px 28px;
+  border:1px solid #aaa;
+  background:rgba(0,0,0,.78);
+  text-align:left;
+  font-size:18px;
+  font-weight:bold;
+}
+.title-config-row{display:flex;justify-content:space-between;padding:6px 4px;cursor:pointer}
+.title-config-row:hover{color:#ffff88}
+.title-config-ok{text-align:center;margin-top:18px;color:#ffff88;cursor:pointer}
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  min-width: 300px;
+  max-width: min(620px, 90vw);
+  padding: 9px 14px;
+  border: 1px solid #888;
+  background: rgba(0,0,0,.88);
+  color: #fff;
+  text-align: center;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s linear;
+}
+#toast.show { opacity: 1; }
+#runtime-screen {
+  display: none;
+  width: 640px;
+  height: 480px;
+  background: #000;
+}
+#runtime-frame {
+  display: block;
+  width: 640px;
+  height: 480px;
+  border: 0;
+  background: #000;
+}
+#runtime-cover {
+  position: absolute;
+  inset: 0;
+  z-index: 1000;
+  width: 640px;
+  height: 480px;
+  background: #000;
+  pointer-events: none;
+}
+#runtime-cover[hidden] {
+  display: none;
+}
+#omake-screen{
+  display:none;
+  width:640px;
+  height:480px;
+  background:#000;
+}
+#omake-frame{
+  display:block;
+  width:640px;
+  height:480px;
+  border:0;
+  background:#000;
+}
+#omake-cover{
+  position:absolute;
+  inset:0;
+  z-index:1000;
+  width:640px;
+  height:480px;
+  background:#000;
+  pointer-events:none;
+}
+#omake-cover[hidden]{display:none}
+#exit-screen {
+  display: none;
+  width: min(560px, 90vw);
+  color: #fff;
+  text-align: center;
+  line-height: 1.9;
+  font-size: 16px;
+}
+#exit-screen strong { color:#ffff88; }
+@media (max-width: 640px), (max-height: 480px) {
+  #game-screen {
+    transform: scale(min(calc(100vw / 640), calc(100vh / 480)));
+  }
+}
+</style>
+</head>
+<body>
+<div id="stage">
+  <section id="launch-notice" role="dialog" aria-modal="true" aria-labelledby="launch-notice-text">
+    <div class="launch-notice-band">
+      <p id="launch-notice-text">このソフトはPleiades Company 牧尾様の許可を得てPN.篠原がHTML5化したものです。<br>トラブルの場合はgithubもしくはreadmeのメールにトラブル内容を送付ください</p>
+      <button class="boot-button" id="launch-start-button" type="button">ゲームスタート</button>
+    </div>
+  </section>
+  <section id="boot-screen" class="screen" aria-label="起動メニュー" style="display:none">
+    <div id="boot-loading" role="status">Now Loading</div>
+    <div id="boot-ui" inert aria-hidden="true">
+      <div class="boot-title">時の故郷完全版<br>起動メニュー</div>
+      <div class="boot-version">Version 3.11</div>
+      <div class="boot-buttons">
+        <button class="boot-button" id="normal-button">通　常</button>
+        <button class="boot-button" id="full-button">フル画面</button>
+        <button class="boot-button" id="help-button">操作説明</button>
+        <button class="boot-button" id="omake-button">おまけ特典</button>
+        <button class="boot-button" id="close-button">終了</button>
+      </div>
+    </div>
+  </section>
+
+  <main id="game-screen" class="screen" aria-label="タイトル画面">
+    <div id="title-background" aria-hidden="true"></div>
+    <div id="game-ui">
+      <div id="debug-badge" hidden title="クリックまたは0キーでデバッグメニュー">DEBUG MODE / menu</div>
+      <div id="title-stack">
+        <div id="title-pre-spacer"></div>
+        <img id="title-logo" src="assets/title.gif" alt="時の故郷">
+        <div class="version">Version 3.11</div>
+        <div id="title-main-gap"></div>
+        <div id="title-post-spacer"></div>
+        <div id="title-menu-list"></div>
+        <div id="title-tail-spacer"></div>
+      </div>
+      <div id="help-note">操作説明はＦ１を押してください</div>
+      <div id="demo-status">Modernization Demo 5.6 / Omake extras restored</div>
+    </div>
+    <button id="title-cat-hotspot" class="title-hotspot" aria-label="ねこモード"></button>
+    <button id="title-face-hotspot" class="title-hotspot" aria-label="タイトル画像を変える" hidden></button>
+    <div id="title-special" hidden>
+      <div id="title-special-panel"></div>
+    </div>
+  </main>
+
+  <section id="runtime-screen" class="screen" aria-label="ゲーム本編">
+    <iframe id="runtime-frame" title="時の故郷 本編" src="about:blank"></iframe>
+    <div id="runtime-cover" aria-hidden="true"></div>
+  </section>
+
+  <section id="omake-screen" class="screen" aria-label="おまけ特典">
+    <iframe id="omake-frame" title="時の故郷 おまけ特典" src="about:blank"></iframe>
+    <div id="omake-cover" aria-hidden="true"></div>
+  </section>
+
+  <section id="exit-screen">
+    <strong>時の故郷を終了しました。</strong><br>
+    このタブを閉じてください。<br>
+    全画面表示中は、Escキーで全画面を解除できます。<br>
+    ローカルサーバはランチャーが自動停止します。
+  </section>
+</div>
+<div id="toast" role="status"></div>
+
+<script src="../sys/music_html5.js"></script>
+<script src="debug_console.js?v=5.6.24"></script>
+<script src="../sys/guide_presets.js?v=5.6.22"></script>
+<script src="title_fade.js?v=5.6.18"></script>
+<script>
+(() => {
+  "use strict";
+
+  const boot = document.getElementById("boot-screen");
+  const bootUi = document.getElementById("boot-ui");
+  const bootLoading = document.getElementById("boot-loading");
+  const game = document.getElementById("game-screen");
+  const gameUi = document.getElementById("game-ui");
+  const titleBackground = document.getElementById("title-background");
+  const exitScreen = document.getElementById("exit-screen");
+  const runtimeScreen = document.getElementById("runtime-screen");
+  const runtimeFrame = document.getElementById("runtime-frame");
+  const runtimeCover = document.getElementById("runtime-cover");
+  const omakeScreen = document.getElementById("omake-screen");
+  const omakeFrame = document.getElementById("omake-frame");
+  const omakeCover = document.getElementById("omake-cover");
+  const titleMenuList = document.getElementById("title-menu-list");
+  const debugBadge = document.getElementById("debug-badge");
+  const titleSpecial = document.getElementById("title-special");
+  const titleSpecialPanel = document.getElementById("title-special-panel");
+  const toast = document.getElementById("toast");
+  const params = new URLSearchParams(location.search);
+  const DEBUG_MODE = params.get("debug") === "1";
+  // Dedicated launcher: change the title appearance without writing clear flags.
+  const YUKATA_TITLE_MODE = params.get("title") === "yukata";
+  const sid = params.get("sid") || "manual";
+  let toastTimer = 0;
+  let heartbeatTimer = 0;
+  let nekoMode = false;
+  let bootIntroToken = 0;
+  let bootIntroFrame = 0;
+  let bootMusicTimer = 0;
+  let bootMusicReady = false;
+  const BOOT_MUSIC_LEAD_IN_MS = 1225;
+
+  const bootAudio = new Audio("../bgm/start.mp3?v=5.6.6");
+  bootAudio.preload = "auto";
+  bootAudio.loop = true;
+  bootAudio.volume = 1.0;
+
+  // Original Title() does:
+  //   SV_Mus="title";
+  //   ChangeMusic("title",true);
+  // The modern shell lives outside the runtime iframe, so the title BGM
+  // needs its own HTML5 Audio object here.
+  const titleAudio = new Audio("../bgm/title.mp3");
+  titleAudio.preload = "auto";
+  titleAudio.loop = true;
+  titleAudio.volume = 1.0;
+
+  const cgAudio = new Audio("../bgm/01.mp3");
+  cgAudio.preload = "auto";
+  cgAudio.loop = true;
+  cgAudio.volume = 1.0;
+
+  const omakeAudio = new Audio("../omake/omake01.mp3?v=5.6.6");
+  omakeAudio.preload = "auto";
+  omakeAudio.loop = true;
+  omakeAudio.volume = 1.0;
+
+  if (window.TokiDebugConsole) {
+    for (const [audio, label] of [[bootAudio, "起動"], [titleAudio, "タイトル"],
+        [cgAudio, "CG閲覧"], [omakeAudio, "おまけ特典"]]) {
+      TokiDebugConsole.watchAudio(audio, label);
+    }
+  }
+
+  let musicModeEngineReady = false;
+
+  const MUSIC_CATALOG = [{"file": "title", "name": "桜色の瞳", "credit": "Cubic Energy 「Music Energy 3」より", "scene": "タイトル", "commentHtml": "タイトル曲です。<br>タイトル画面はそんなにじっくり見るものじゃないですから、<br>短いですね（笑）"}, {"file": "01", "name": "Birth in Spring", "credit": "Cubic Energy 「Music Energy 3」より", "scene": "里山村", "commentHtml": "里山村のメインテーマですが、導入部と一部のイベントでしか<br>流れませんね。曲自体は非常に長いんですが、まず最後まで<br>聞くことはないと思います（笑）"}, {"file": "02", "name": "Night Dew in Your Eyes", "credit": "Cubic Energy 「Music Energy 3」より", "scene": "朝のＢＧＭ", "commentHtml": "朝のシーンのＢＧＭなんですが、タイトルを見るとなぜか…<br>夜をイメージしてるみたいですね。<br>果たしていいんでしょうか（笑）"}, {"file": "03", "name": "New Life", "credit": "Cubic Energy 「Music Energy 3」より", "scene": "昼のＢＧＭ", "commentHtml": "昼のシーンで、最初に聞く基本ＢＧＭです。<br>セミの声に消されない活発なメロディーがお気に入り。"}, {"file": "04", "name": "SUMMER", "credit": "YAMAHA「MIDIのたね」より", "scene": "夕方のＢＧＭ", "commentHtml": "なんかそのまんまな原曲名ですが、暑っ苦しい夕方の<br>イメージに合ってますね。<br>高音が抑え目なので夕方シーンに使ってみました。"}, {"file": "05", "name": "Icc_f", "credit": "Office Dopより", "scene": "夜のＢＧＭ", "commentHtml": "Ｏｆｆｉｃｅ　Ｄｏｐは活動を停止してるようなので、正式なタイトル<br>が分からないのが残念。"}, {"file": "07", "name": "Distillation-蒸留", "credit": "CHAM様「Cool Cham」より", "scene": "夢の中で", "commentHtml": "夢のシーンはもっと多くなる予定だったんですが、実際には<br>１回しか使われませんでした。<br>雰囲気がいい曲なので勿体無いですね。"}, {"file": "08", "name": "Canyon Breeze", "credit": "YAMAHA「MIDIのたね」より", "scene": "ゆり子のテーマ", "commentHtml": "爽やかで可愛らしい雰囲気を…というテーマで探してみると<br>見つかった曲です。<br>白い帽子のお嬢さん、ってなイメージでしょうか。"}, {"file": "09", "name": "春風", "credit": "Cubic Energy 「Music Energy 3」より", "scene": "おまけ", "commentHtml": "クリア後のおまけシーンのＢＧＭとして使われてますが、実は<br>外出シーン（つまりデート）に使う予定でした。<br>そんなイキな場面はないんですけどね（笑）"}, {"file": "10", "name": "夏微風", "credit": "ＡＩ様「月夜のピアノ」より", "scene": "メインテーマ", "commentHtml": "まさにこの曲が、このゲームを言い表していますね。<br>名実ともにメインテーマです。<br>この曲がなければこのゲームは無かった、と言えるでしょう。"}, {"file": "11", "name": "SECRETX", "credit": "YAMAHA「MIDIのたね」より", "scene": "推理シーン", "commentHtml": "蔵の中、あるいは推理シーンで使われています。<br>家の中で最もミステリアスな、蔵の雰囲気を表現しています。"}, {"file": "12", "name": "Cool Crystal", "credit": "Cubic Energy 「Music Energy 3」より", "scene": "サスペンス", "commentHtml": "４日目の朝、運命の電話シーンで流れます。<br>今までの暖かい雰囲気が一気に冷え込む…<br>そんな場面にぴったりの曲です。"}, {"file": "13", "name": "差し迫るその瞬間", "credit": "Cubic Energy 「Music Energy 3」より", "scene": "緊迫", "commentHtml": "最後の試練、ゆり子を救うラストチャンスで流れます。<br>果たして間に合うのか、成功するのか！？<br>そんな雰囲気ですね。"}, {"file": "14", "name": "Nostalgia", "credit": "大島様「homu' works」より", "scene": "思い出のシーン", "commentHtml": "曲名からずばり「ノスタルジア」な場面です。<br>セピア色の過去を振り返り、もう戻れない過去の日々を想う…<br>このゲームの、もう一つのメインテーマかもしれません。"}, {"file": "15", "name": "忘れていた約束", "credit": "443様「y443's MOD Page」より", "scene": "河原の別れ", "commentHtml": "中盤からの盛り上がりがさらに泣かせます。<br>曲名が異様にマッチしてるのは、偶然にしては出来すぎですね（笑）"}, {"file": "16", "name": "Nostalgia for solo", "credit": "大島様「homu' works」より", "scene": "縁側にて", "commentHtml": "14曲目の「Nostalgia」のアレンジバージョンです。<br>縁側で涼みながらすいかを食べる…そんな場面に合ってますね。"}, {"file": "17", "name": "PSMAT011.MID", "credit": "P's MAT MIDIライブラリより", "scene": "ラブコメ", "commentHtml": "とにかくふざけた曲が入れたくて選んでみました。<br>お約束のセオリーをどうどうと踏襲しながら、どこにも逃げ場が<br>ないようなハズカシさがにじみ出てます（笑）"}, {"file": "18", "name": "時の忘れ物", "credit": "あまやかん様「あまやかん天満宮」より", "scene": "最終章", "commentHtml": "これまた、曲名と用途があまりにもハマりすぎです！<br>時を逆行しゆり子を救おうとする主人公の決意が<br>表れていると思います。"}, {"file": "19", "name": "Tubular", "credit": "YAMAHA「MIDIのたね」より", "scene": "決意", "commentHtml": "ひいじいちゃんの手記を読む場面、および河原でゆり子を<br>救うことを決意したシーンで流れます。<br>曲名がよく分からないのが残念です。"}, {"file": "20", "name": "回想", "credit": "ＫＯＮＩ＝Ｋ様「MIDI素材集のぺぇじ」より", "scene": "帰り道", "commentHtml": "曲をゲームに入れた瞬間から、この曲以外は考えられない<br>と思うくらいハマってます。<br>帰り道から駅までのシーンで使われています。"}, {"file": "32", "name": "WAILED PAL", "credit": "Cubic Energy 「Music Energy 3」より", "scene": "バッドエンド", "commentHtml": "サスペンスドラマのエンディングテーマみたいな曲ですが、<br>バッドエンドのスタッフロール用ＢＧＭです。どこか切ない<br>曲の終わり方と、最後の帽子の写真がマッチしています。"}, {"file": "33", "name": "Triumph", "credit": "YAMAHA「MIDIのたね」より", "scene": "ハッピーエンド", "commentHtml": "ハッピーエンドだけに、思いっきり歯切れよく心を揺さぶる曲です。<br>直前の静けさを蹴破るように始まるこの曲で、スタッフロールの<br>終わりまで感動の余韻を引っ張ってくれます。<br>ぜひ大音量で聞いてください（笑）"}, {"file": "21", "name": "夕涼み", "credit": "須釜俊一様「須釜俊一のフリーMIDI素材集」より", "scene": "都会の夜", "commentHtml": "ここから追加シナリオの曲となります。<br>本編では全く無かった、都会のシーンで流れるＢＧＭです。<br>以前から変わろうとする聡志の気持ちを表現しています。"}, {"file": "22", "name": "b_023xgw.mid", "credit": "インプレスより", "scene": "謎の少女", "commentHtml": "神秘的な雰囲気を帯びた、謎の少女のテーマ曲です。<br>どこか周囲の空間から浮き出たような、哀愁を帯びたギターの<br>旋律がしみじみときます。"}, {"file": "23", "name": "Compound", "credit": "kenji tanaka様より", "scene": "賢者の攻撃", "commentHtml": "敵の攻撃シーンのＢＧＭです。<br>単調にひたすら続くリズムが一層不気味な雰囲気をかもし<br>出しています。<br>ぜひ重低音を効かせてお聞きください。"}, {"file": "24", "name": "4_allnig.mid", "credit": "World of Soundより", "scene": "スーパーマーケット", "commentHtml": "いかにもスーパーで流れてそうなＢＧＭです（笑）。<br>長い曲ですが、ほとんど最後まで聞くことはないでしょう。"}, {"file": "25", "name": "Psmat516.mid", "credit": "Finalia P's Matより", "scene": "安らぎ", "commentHtml": "オルゴールの曲といえば、安らぎのシーンを連想しますが…<br>どこか切ない感情の篭もった旋律です。現実は冷たいけれども、<br>せめて夢の中では安らぎを－といった感じでしょうか。"}, {"file": "26", "name": "水溜まりに映る風景", "credit": "Cubic Energy 「Music Energy 2」より", "scene": "彼女の安否は", "commentHtml": "エコレンジャーで聞いたことがある、と思った人。<br>あなたはPcomp通です（笑）。<br>病院のシーン、里山村に帰ったシーンで使われています。"}, {"file": "27", "name": "金と銀の輪舞曲", "credit": "Wakaba様「Wakaba's Music Page」より", "scene": "少女の正体", "commentHtml": "謎の少女の正体が明かされる時のＢＧＭです。<br>重い宿命を負った彼女の正体を受け止める、聡志の心境を<br>表現しています。"}, {"file": "34", "name": "落陽", "credit": "mido様「Forest Green」より", "scene": "エンディングロールＢ２", "commentHtml": "追加シナリオのエンディング（バッドおよびノーマル）のテーマです。<br>ＥＤごとに異なる画像となっていますが、淡々と流れる<br>旋律に、悠久たる時の流れを感じさせる……かな？"}, {"file": "35", "name": "Love_for.mid", "credit": "Office dopより", "scene": "少女との別れ", "commentHtml": "「時の館」のＥＤでも使われていた曲です。<br>これは、物語のテーマの一部が「時の館」と重なるからですね。<br>前作をプレイしていれば、その伏線として楽しめるでしょう（笑）"}, {"file": "40", "name": "Faithful", "credit": "World of Soundより", "scene": "トゥルーエンディング", "commentHtml": "追加シナリオのトゥルーエンディングです。<br>これから先はまだまだ長いけど、聡志とゆり子の物語はずっと<br>続いていくんだ、という希望を感じさせます。"}];
+
+  function readLegacyStorageSection(section) {
+    try {
+      const raw = localStorage.getItem("tokifuru.v3.data0") || "";
+      const start = raw.indexOf(section + "=");
+      if (start < 0) return "";
+      const end = raw.indexOf("#", start);
+      if (end < 0) return "";
+      return unescape(raw.substring(start + section.length + 1, end));
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function writeLegacyStorageSection(section, data) {
+    try {
+      let raw = localStorage.getItem("tokifuru.v3.data0") || "";
+      const encoded = escape(String(data));
+      const start = raw.indexOf(section + "=");
+      if (start < 0) {
+        raw += section + "=" + encoded + "#";
+      } else {
+        const end = raw.indexOf("#", start);
+        const tail = end >= 0 ? raw.substring(end + 1) : "";
+        raw = raw.substring(0, start) + tail + section + "=" + encoded + "#";
+      }
+      localStorage.setItem("tokifuru.v3.data0", raw);
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  }
+
+  const endingLabels = [
+    "BadEnd 01","BadEnd 02","BadEnd 03","BadEnd 04","BadEnd 05","BadEnd 06",
+    "BadEnd 07","GoodEnd 01","GoodEnd 02","GoodEnd 03","GoodEnd 04","GoodEnd 05",
+    "BadEnd B1","BadEnd B2","BadEnd B3","GoodEnd B1","GoodEnd B2","BadEnd B4"
+  ];
+  const endingNames = [
+    "抗えない運命","真夏の夜の夢","約束は時の彼方に","僕に勇気を","裏切られた約束","過去の人",
+    "振り返ることもなく","もう一度君と","この青い空の下で","未来への前進","去り行く君の為に","傷心",
+    "さらば青春よ","眠れる君","賢者の鉄槌","旅立ちの朝","遠い朝を求めて","亡き娘への鎮魂歌"
+  ];
+  const endingGood = [0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,1,1,1];
+
+  const kidScenes = [
+    [0,"オープニング"],[1,"日常シーン"],[4,"蔵の中"],[5,"不思議な夢"],
+    [10,"ゆり子との再会"],[11,"ゆり子とそうめん"],[12,"ゆり子とすいか"],[13,"親から電話"],
+    [14,"花火大会の夜"],[20,"真田家来訪"],[21,"ゆり子の庭掃除"],[22,"人類の宿敵"],
+    [23,"山田商店へ買い物"],[24,"懐かしいアルバム"],[25,"ゆり子のお昼寝"],[26,"思い出のペンダント"],
+    [50,"最終章・時の故郷"],[90,"Good End 01"],[91,"Good End 02"],[92,"Good End 03"],
+    [93,"Good End 04"],[94,"Good End 05"],[95,"Bad End 06&07"],[30,"１年後の二人"],
+    [31,"病院にて"],[32,"里山村ふたたび"],[33,"賢者との対決"],[96,"Bad End B-4"],
+    [97,"Good End B-2"],[98,"Good End B-1"]
+  ];
+
+  function applyDebugUnlocks() {
+    if (!DEBUG_MODE) return;
+
+    // start_DEBUG.bat uses port 8005. localStorage is therefore isolated
+    // from the normal game on port 8003.
+    let flags = "0".repeat(25).split("");
+
+    // All 15 CG entries unlocked in DEBUG only.
+    // Normal mode still uses the exact original sfset(0..14) history.
+    for (let i=0;i<15;i++) flags[i] = "1";
+
+    // Default last ending = 90, so the ordinary "3:おまけ" button also works.
+    flags[16] = "9";
+    flags[17] = "0";
+
+    // Original post-clear unlock bits.
+    flags[18] = "1"; // CG
+    flags[19] = "1"; // music
+    flags[20] = "1"; // alternate title background
+
+    writeLegacyStorageSection("FLAG", flags.join(""));
+    writeLegacyStorageSection("ENDLIST", "1".repeat(18) + "0".repeat(12));
+    writeLegacyStorageSection("LastEnding", "DEBUG");
+  }
+
+  function getTitleState() {
+    const flags = (readLegacyStorageSection("FLAG") || "0000000000000000000000000").padEnd(25,"0");
+    const elist = (readLegacyStorageSection("ENDLIST") || "000000000000000000000000000000").padEnd(30,"0");
+    const lastEnding = readLegacyStorageSection("LastEnding");
+    return {flags, elist, lastEnding};
+  }
+
+  function titleItemsForState(state) {
+    const items = [
+      ["new","1:最初から始める"],
+      ["load","2:続きから始める"]
+    ];
+    if (state.lastEnding !== "") items.push(["omake","3:おまけ"]);
+    if (state.flags.charAt(18)==="1") items.push(["cg","4:ＣＧ閲覧"]);
+    if (state.flags.charAt(19)==="1") items.push(["music","5:音楽鑑賞"]);
+    if (state.elist.indexOf("1")!==-1) items.push(["ending","6:エンディング一覧"]);
+    items.push(["kid","7:既読率チェック"],["config","8:環境設定"],["quit","9:終了"]);
+    return items;
+  }
+
+  function renderTitle() {
+    applyDebugUnlocks();
+    debugBadge.hidden = !DEBUG_MODE;
+    const state = getTitleState();
+    const items = titleItemsForState(state);
+
+    let bg = "assets/tback.jpg";
+    if (YUKATA_TITLE_MODE) {
+      bg = "assets/tback2.jpg";
+    } else if (state.flags.charAt(19)==="1") {
+      bg = state.flags.charAt(20)==="1" ? "assets/tback4.jpg" : "assets/tback2.jpg";
+    }
+    titleBackground.style.backgroundImage = `url("${bg}")`;
+    document.getElementById("title-face-hotspot").hidden = !YUKATA_TITLE_MODE &&
+      (state.flags.charAt(19)!=="1" || state.flags.charAt(20)==="1");
+
+    titleMenuList.innerHTML = items.map(([action,label]) =>
+      `<div class="title-menu" tabindex="0" data-action="${action}">${label}</div>`
+    ).join("");
+
+    // Exact vertical spacing from supplied original sys/title.js:
+    //
+    // if flag[20]:
+    //   LastEnding empty    -> 65px before logo, 30px before menu
+    //   LastEnding present  -> 80px before logo, 20px before menu
+    //
+    // Always:
+    //   20px after Version
+    //   6px between menu rows
+    //   36px after the final row
+    //
+    // The whole stack is vertically centered, matching the original
+    // 640x480 <table><td valign=middle>.
+    const clearedTitle = !YUKATA_TITLE_MODE && state.flags.charAt(20)==="1";
+    const hasLastEnding = state.lastEnding !== "";
+    document.getElementById("title-pre-spacer").style.height =
+      clearedTitle ? (hasLastEnding ? "80px" : "65px") : "0px";
+    document.getElementById("title-post-spacer").style.height =
+      clearedTitle ? (hasLastEnding ? "20px" : "30px") : "0px";
+    return bg;
+  }
+
+  let titleSpecialMode = "";
+  let cgState = null;
+  let musicModeState = null;
+
+  function hideTitleSpecial() {
+    titleSpecialMode = "";
+    cgState = null;
+    musicModeState = null;
+    titleSpecial.hidden = true;
+    titleSpecialPanel.innerHTML = "";
+  }
+
+  function showSpecial(background, mode = "") {
+    TokiTitleFade.cancel();
+    titleSpecialMode = mode;
+    titleSpecialPanel.innerHTML = "";
+    titleSpecialPanel.style.backgroundImage = `url("${background}")`;
+    titleSpecial.hidden = false;
+  }
+
+  // v5.6.22: hidden "攻略ジャンプ" for checking the normal version.
+  // Lists the walkthrough's save points (sys/guide_presets.js); choosing one
+  // starts the game from there through the same load path as 続きから.
+  function showGuideJump() {
+    const presets = window.TOKIFURU_GUIDE_PRESETS || [];
+    showSpecial("../bg/92.jpg", "jump");
+    const head = document.createElement("div");
+    head.className = "jump-head";
+    head.textContent = "攻略ジャンプ";
+    titleSpecialPanel.appendChild(head);
+    const note = document.createElement("div");
+    note.className = "jump-note";
+    note.textContent = "動作確認用：攻略のセーブ地点から、その場面を直接再開します。\nセーブ枠・ED回収記録・既読記録は変更しません。";
+    titleSpecialPanel.appendChild(note);
+    const list = document.createElement("div");
+    list.className = "jump-list";
+    let part = "";
+    for (const preset of presets) {
+      if (preset.part !== part) {
+        part = preset.part;
+        const label = document.createElement("div");
+        label.className = "jump-part";
+        label.textContent = "── " + part + " ──";
+        list.appendChild(label);
+      }
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "jump-row";
+      const title = document.createElement("b");
+      title.textContent = preset.no + "［セーブ" + preset.slot + "］" + preset.scene;
+      const next = document.createElement("small");
+      next.textContent = "→ " + preset.next;
+      row.append(title, next);
+      row.addEventListener("click", () => startGame("preset:" + preset.id));
+      list.appendChild(row);
+    }
+    titleSpecialPanel.appendChild(list);
+    addSpecialReturn();
+    list.querySelector(".jump-row")?.focus({ preventScroll: true });
+  }
+
+  function addSpecialReturn() {
+    const back = document.createElement("img");
+    back.src = "../sys/title.jpg";
+    back.className = "special-return";
+    back.alt = "タイトルへ戻る";
+    back.addEventListener("click", () => showTitle());
+    titleSpecialPanel.appendChild(back);
+  }
+
+  const cgMain = [61,41,42,51,43,50,46,49,48,83,200,201,203,205,208];
+  const cgAlt  = [ 0, 0, 0, 0, 0, 0, 0, 0,52,84,  0,202,204,  0,  0];
+  const cgLabels = [
+    "初恋の少女","帰ってきた彼女","そうめん食いねぇ","寝言にドキドキ","縁側にて",
+    "急接近注意！","約束の花火大会","月下の別れ","別れの抱擁","再会の涙",
+    "眠れる君","作戦会議","血と涙と再会と","告白","パパ大好き"
+  ];
+
+  function showCGViewer() {
+    const state = getTitleState();
+    showSpecial("../bg/60.jpg", "cg");
+    playCgMusic(true);
+
+    const root = document.createElement("div");
+    root.id = "cg-viewer";
+
+    const title = document.createElement("img");
+    title.id = "cg-title";
+    title.src = "../sys/cgtitle.gif";
+    title.alt = "ＣＧモード";
+    root.appendChild(title);
+
+    const grid = document.createElement("div");
+    grid.id = "cg-grid";
+
+    const unlocked = [];
+    for (let i=0;i<15;i++) {
+      unlocked[i] = state.flags.charAt(i)==="1";
+
+      const img = document.createElement("img");
+      img.className = "cg-thumb" + (unlocked[i] ? "" : " locked");
+      img.src = unlocked[i] ? `../sys/${cgMain[i]}s.jpg` : "../sys/unknown.jpg";
+      img.width = 120;
+      img.height = 90;
+      img.alt = unlocked[i] ? cgLabels[i] : "未解放";
+      img.draggable = false;
+
+      if (unlocked[i]) {
+        img.addEventListener("mouseenter", () => {
+          const label = document.getElementById("cg-label");
+          if (label) label.textContent = cgLabels[i];
+        });
+        img.addEventListener("mouseleave", () => {
+          const label = document.getElementById("cg-label");
+          if (label) label.textContent = "";
+        });
+        img.addEventListener("click", () => cgOpen(i));
+      }
+      grid.appendChild(img);
+    }
+    root.appendChild(grid);
+
+    const labelBack = document.createElement("div");
+    labelBack.id = "cg-label-back";
+    root.appendChild(labelBack);
+
+    const label = document.createElement("div");
+    label.id = "cg-label";
+    root.appendChild(label);
+
+    const back = document.createElement("img");
+    back.id = "cg-return";
+    back.src = "../sys/title.jpg";
+    back.alt = "タイトルへ戻る";
+    back.draggable = false;
+    back.addEventListener("click", cgBackAction);
+    root.appendChild(back);
+
+    const full = document.createElement("div");
+    full.id = "cg-full";
+    full.hidden = true;
+
+    const layerA = document.createElement("img");
+    layerA.className = "cg-full-layer";
+    layerA.draggable = false;
+
+    const layerB = document.createElement("img");
+    layerB.className = "cg-full-layer";
+    layerB.draggable = false;
+
+    const click = document.createElement("div");
+    click.id = "cg-full-click";
+    click.addEventListener("click", cgHideOrNext);
+
+    const counter = document.createElement("div");
+    counter.id = "cg-counter";
+
+    full.append(layerA, layerB, click, counter);
+    root.appendChild(full);
+    titleSpecialPanel.appendChild(root);
+
+    cgState = {
+      unlocked,
+      now:-1,
+      altShown:false,
+      full,
+      layers:[layerA,layerB],
+      activeLayer:0,
+      counter
+    };
+
+    // Preload unlocked full-size CGs, including alternate images.
+    for (let i=0;i<15;i++) {
+      if (!unlocked[i]) continue;
+      const a = new Image();
+      a.src = `../bg/${cgMain[i]}.jpg`;
+      if (cgAlt[i]) {
+        const b = new Image();
+        b.src = `../bg/${cgAlt[i]}.jpg`;
+      }
+    }
+  }
+
+  function cgCrossfadeTo(num) {
+    if (!cgState) return;
+    const nextIndex = 1 - cgState.activeLayer;
+    const next = cgState.layers[nextIndex];
+    const prev = cgState.layers[cgState.activeLayer];
+
+    const preload = new Image();
+    preload.onload = () => {
+      if (!cgState) return;
+      next.classList.remove("active");
+      next.src = preload.src;
+      void next.offsetWidth;
+
+      next.classList.add("active");
+      prev.classList.remove("active");
+      cgState.activeLayer = nextIndex;
+    };
+    preload.src = `../bg/${num}.jpg`;
+  }
+
+  function cgOpen(index) {
+    if (!cgState || !cgState.unlocked[index]) return;
+
+    cgState.now = index;
+    cgState.altShown = false;
+    cgState.full.hidden = false;
+
+    // Reset the two-layer blend surface.
+    for (const layer of cgState.layers) {
+      layer.classList.remove("active");
+      layer.removeAttribute("src");
+    }
+    cgState.activeLayer = 0;
+
+    const first = cgState.layers[0];
+    const preload = new Image();
+    preload.onload = () => {
+      if (!cgState || cgState.now!==index) return;
+      first.src = preload.src;
+      requestAnimationFrame(() => first.classList.add("active"));
+    };
+    preload.src = `../bg/${cgMain[index]}.jpg`;
+
+    cgState.counter.textContent = cgAlt[index] ? "1 / 2" : "";
+  }
+
+  function cgHideOrNext() {
+    if (!cgState || cgState.full.hidden || cgState.now<0) return;
+
+    const alt = cgAlt[cgState.now];
+    if (alt && !cgState.altShown) {
+      cgState.altShown = true;
+      cgState.counter.textContent = "2 / 2";
+      cgCrossfadeTo(alt);
+      return;
+    }
+
+    cgState.full.hidden = true;
+    cgState.now = -1;
+    cgState.altShown = false;
+    cgState.counter.textContent = "";
+    for (const layer of cgState.layers) {
+      layer.classList.remove("active");
+      layer.removeAttribute("src");
+    }
+  }
+
+  function cgBackAction() {
+    if (!cgState) {
+      showTitle();
+      return;
+    }
+
+    // Modern equivalent of original toTitle()/HIDE():
+    // while a CG is open, first advance/close it; only the grid exits to title.
+    if (!cgState.full.hidden) {
+      cgHideOrNext();
+      return;
+    }
+
+    showTitle();
+  }
+
+  function ensureMusicModeEngine() {
+    if (musicModeEngineReady) return;
+    InitMusic();
+    if (window.TokiDebugConsole) {
+      MUS_AudioChannels.forEach((audio, channel) => TokiDebugConsole.watchAudio(audio, "音楽鑑賞 CH" + channel, false));
+    }
+    MUS_MusicFolder = "../bgm";
+    musicModeEngineReady = true;
+  }
+
+  function showMusicViewer() {
+    const state = getTitleState();
+
+    // Original music.htm:
+    //   if sflag.charAt(20)=="1" lastmusic=31; else lastmusic=21;
+    const lastIndex = state.flags.charAt(20)==="1" ? 31 : 21;
+
+    stopTitleMusic();
+    stopCgMusic();
+    ensureMusicModeEngine();
+    stopMusicMode(true);
+
+    showSpecial("../bg/05.jpg", "music");
+
+    const root = document.createElement("div");
+    root.id = "music-viewer";
+
+    const num = document.createElement("div");
+    num.id = "music-num";
+
+    const name = document.createElement("div");
+    name.id = "music-name";
+
+    const credit = document.createElement("div");
+    credit.id = "music-credit";
+
+    const scene = document.createElement("div");
+    scene.id = "music-scene";
+
+    const comment = document.createElement("div");
+    comment.id = "music-comment";
+
+    const status = document.createElement("div");
+    status.id = "music-status";
+    status.textContent = `${lastIndex+1} tracks`;
+
+    const panel = document.createElement("div");
+    panel.id = "music-panel";
+
+    const controls = [
+      ["backward.jpg","前の曲", musicBack],
+      ["play.jpg","再生", musicPlay],
+      ["forward.jpg","次の曲", musicNext],
+      ["stop.jpg","停止", () => stopMusicMode(false)],
+      ["title.jpg","タイトルへ戻る", musicToTitle],
+    ];
+
+    for (const [file,alt,handler] of controls) {
+      const img = document.createElement("img");
+      img.src = "../sys/" + file;
+      img.alt = alt;
+      img.title = alt;
+      img.className = "music-panel-btn";
+      img.draggable = false;
+      img.addEventListener("pointerdown", () => {
+        if (musicModeEngineReady) MUS_UnlockAudio();
+      });
+      img.addEventListener("click", handler);
+      panel.appendChild(img);
+    }
+
+    root.append(num,name,credit,scene,comment,panel,status);
+    titleSpecialPanel.appendChild(root);
+
+    musicModeState = {
+      index:0,
+      lastIndex,
+      els:{num,name,credit,scene,comment,status},
+      playingIndex:-1
+    };
+
+    musicRender();
+  }
+
+  function musicRender() {
+    if (!musicModeState) return;
+    const i = musicModeState.index;
+    const row = MUSIC_CATALOG[i];
+
+    musicModeState.els.num.textContent = `曲番号：${i+1}`;
+    musicModeState.els.name.textContent = `「${row.name}」`;
+    musicModeState.els.credit.textContent = `提供：${row.credit}`;
+    musicModeState.els.scene.textContent = `場面：${row.scene}`;
+    musicModeState.els.comment.innerHTML = row.commentHtml;
+
+    const playing = musicModeState.playingIndex;
+    musicModeState.els.status.textContent =
+      `${musicModeState.lastIndex+1} tracks` +
+      (playing>=0 ? ` / PLAY ${playing+1}` : "");
+  }
+
+  function musicBack() {
+    if (!musicModeState) return;
+    musicModeState.index--;
+    if (musicModeState.index < 0) musicModeState.index = musicModeState.lastIndex;
+    musicRender();
+  }
+
+  function musicNext() {
+    if (!musicModeState) return;
+    musicModeState.index++;
+    if (musicModeState.index > musicModeState.lastIndex) musicModeState.index = 0;
+    musicRender();
+  }
+
+  function musicPlay() {
+    if (!musicModeState) return;
+
+    ensureMusicModeEngine();
+
+    const index = musicModeState.index;
+    const row = MUSIC_CATALOG[index];
+
+    stopTitleMusic();
+    stopCgMusic();
+
+    // Exact original music.htm call:
+    // MUS_PlayMusic(a+".mp3",100,true,10,0,false)
+    //
+    // The shared HTML5 engine performs the 1-second old-track fade and then
+    // starts the selected track on the same music channel.
+    MUS_PlayMusic(row.file + ".mp3", 100, true, 10, 0, false);
+    MUS_UnlockAudio();
+
+    musicModeState.playingIndex = index;
+    musicRender();
+  }
+
+  function stopMusicMode(immediate=false) {
+    if (!musicModeEngineReady) {
+      if (musicModeState) {
+        musicModeState.playingIndex = -1;
+        musicRender();
+      }
+      return;
+    }
+
+    // Exact original behavior:
+    // M_Stop()  -> MUS_StopMusic(15)
+    // toTitle() -> MUS_StopMusic(0)
+    MUS_StopMusic(immediate ? 0 : 15);
+
+    if (musicModeState) {
+      musicModeState.playingIndex = -1;
+      musicRender();
+    }
+  }
+
+  function musicToTitle() {
+    stopMusicMode(true);
+    showTitle();
+  }
+
+  function showEndingList() {
+    const state = getTitleState();
+    showSpecial("../bg/92.jpg");
+
+    const head = document.createElement("div");
+    head.className = "special-title-image";
+    head.innerHTML = '<img src="../sys/elist.gif" alt="エンディング一覧">';
+    titleSpecialPanel.appendChild(head);
+
+    const note = document.createElement("div");
+    note.className = "special-ending-note";
+    note.textContent = "黄色い色のエンディングはクリックすると再生できます。";
+    titleSpecialPanel.appendChild(note);
+
+    const list = document.createElement("div");
+    list.className = "special-scroll";
+    for (let i=0;i<18;i++) {
+      const row = document.createElement("span");
+      const unlocked = state.elist.charAt(i)==="1";
+      if (!unlocked) {
+        row.className = "end-none";
+        row.textContent = endingLabels[i] + ":??????";
+      } else if (!endingGood[i]) {
+        row.className = "end-bad";
+        row.textContent = endingLabels[i] + ":" + endingNames[i];
+      } else {
+        row.className = "end-good";
+        row.textContent = endingLabels[i] + ":" + endingNames[i];
+        row.addEventListener("click", () => startGame("endingview:" + i));
+      }
+      list.appendChild(row);
+    }
+    titleSpecialPanel.appendChild(list);
+    addSpecialReturn();
+  }
+
+  function showKidCheck() {
+    showSpecial("../bg/23.jpg");
+
+    const head = document.createElement("div");
+    head.className = "special-title-image";
+    head.innerHTML = '<img src="../sys/kidlist.gif" alt="既読率チェック">';
+    titleSpecialPanel.appendChild(head);
+
+    let totalRead = 0;
+    const rows = [];
+    for (const [page,name] of kidScenes) {
+      const dt = readLegacyStorageSection("read" + page);
+      if (!dt) {
+        rows.push(`<tr><td>??????</td><td>????/????</td><td>---%</td></tr>`);
+        continue;
+      }
+
+      let read=0, total=0;
+      for (const ch of dt) {
+        if (ch==="0") total++;
+        if (ch==="1") { total++; read++; }
+      }
+      totalRead += read;
+      const perc = total ? Math.floor(read/total*100) : 0;
+      rows.push(`<tr><td>${name}</td><td>${read}/${total}</td><td>${perc}%</td></tr>`);
+    }
+
+    const total0 = 3935; // Exact original checker.htm constant.
+    const totalPerc = Math.floor(totalRead/total0*100);
+    const area = document.createElement("div");
+    area.className = "special-scroll";
+    area.innerHTML =
+      `<table class="kid-table"><thead><tr><th>シーン</th><th>既読数</th><th>既読率</th></tr></thead>` +
+      `<tbody>${rows.join("")}<tr><th>合計</th><td>${totalRead}/${total0}</td><td>${totalPerc}%</td></tr></tbody></table>`;
+    titleSpecialPanel.appendChild(area);
+    addSpecialReturn();
+  }
+
+  function showDebugMenu() {
+    if (!DEBUG_MODE) return;
+
+    showSpecial("../bg/23.jpg");
+
+    const endingCodes = [
+      80,81,82,83,84,85,86,
+      90,91,92,93,94,
+      70,71,72,73,74,75
+    ];
+
+    const panel = document.createElement("div");
+    panel.className = "debug-panel";
+    panel.innerHTML =
+      `<h2>DEBUG MODE</h2>` +
+      `<div class="debug-note">` +
+      `通常版とは別ポート（8005）なのでセーブは完全分離。` +
+      `全18EDとクリア後タイトル項目を強制解放中。<br>` +
+      `下の18ボタンは <b>63.dat の各おまけ分岐を直接起動</b>します。` +
+      `</div>` +
+      `<div class="debug-actions">` +
+        `<button class="debug-action-btn" data-debug-action="cg">CG閲覧</button>` +
+        `<button class="debug-action-btn" data-debug-action="music">音楽鑑賞</button>` +
+        `<button class="debug-action-btn" data-debug-action="ending-list">全ED一覧</button>` +
+        `<button class="debug-action-btn" data-debug-action="kid">既読率</button>` +
+        `<button class="debug-action-btn" data-debug-action="title">タイトル</button>` +
+      `</div>` +
+      `<div class="debug-grid"></div>`;
+
+    const grid = panel.querySelector(".debug-grid");
+    endingCodes.forEach(code => {
+      const idx = [80,81,82,83,84,85,86,90,91,92,93,94,70,71,72,73,74,75].indexOf(code);
+      const btn = document.createElement("button");
+      btn.className = "debug-omake-btn";
+      btn.textContent = `${String(code).padStart(2,"0")} / ${endingLabels[idx]} / ${endingNames[idx]}`;
+      btn.addEventListener("click", () => startGame("omake-test:" + code));
+      grid.appendChild(btn);
+    });
+
+    panel.querySelector('[data-debug-action="cg"]').addEventListener("click", showCGViewer);
+    panel.querySelector('[data-debug-action="music"]').addEventListener("click", showMusicViewer);
+    panel.querySelector('[data-debug-action="ending-list"]').addEventListener("click", showEndingList);
+    panel.querySelector('[data-debug-action="kid"]').addEventListener("click", showKidCheck);
+    panel.querySelector('[data-debug-action="title"]').addEventListener("click", showTitle);
+
+    titleSpecialPanel.appendChild(panel);
+  }
+
+  function showTitleConfig() {
+    showSpecial("assets/tback.jpg");
+    let cfg = readLegacyStorageSection("systemconfig") || "1111110";
+    cfg = cfg.padEnd(7,"0").slice(0,7);
+    const labels = [
+      "１：ＢＧＭ再生","２：ＳＥ再生","３：ムービー再生","４：画像フェード",
+      "５：音楽フェード","６：未読スキップ停止","７：オートプレイ"
+    ];
+
+    const box = document.createElement("div");
+    box.className = "title-config-box";
+
+    function draw() {
+      box.innerHTML = labels.map((label,i) =>
+        `<div class="title-config-row" data-cfg="${i}"><span>${label}</span><span>${cfg.charAt(i)==="1"?"ＯＮ":"ＯＦＦ"}</span></div>`
+      ).join("") + `<div class="title-config-ok">決定</div>`;
+
+      box.querySelectorAll("[data-cfg]").forEach(row => {
+        row.addEventListener("click", () => {
+          const i = Number(row.dataset.cfg);
+          cfg = cfg.substring(0,i) + (cfg.charAt(i)==="1"?"0":"1") + cfg.substring(i+1);
+          writeLegacyStorageSection("systemconfig",cfg);
+          if (i===0) {
+            if (cfg.charAt(0)==="1") playTitleMusic(false);
+            else stopTitleMusic();
+          }
+          draw();
+        });
+      });
+      box.querySelector(".title-config-ok").addEventListener("click", showTitle);
+    }
+
+    draw();
+    titleSpecialPanel.appendChild(box);
+  }
+
+  function titleBgmEnabled() {
+    const cfg = readLegacyStorageSection("systemconfig");
+    // Original default is BGMSW=true.
+    return !cfg || cfg.charAt(0) === "1";
+  }
+
+  function stopTitleMusic() {
+    try { titleAudio.pause(); } catch (e) {}
+  }
+
+  function cancelBootMusicCue() {
+    clearTimeout(bootMusicTimer);
+    bootMusicTimer = 0;
+    bootMusicReady = false;
+  }
+
+  function stopBootMusic() {
+    cancelBootMusicCue();
+    try { bootAudio.pause(); } catch (e) {}
+  }
+
+  function scheduleBootMusic(token) {
+    cancelBootMusicCue();
+    bootMusicTimer = setTimeout(() => {
+      bootMusicTimer = 0;
+      if (token !== bootIntroToken || boot.style.display === "none" ||
+          exitScreen.style.display === "block") return;
+      bootMusicReady = true;
+      playBootMusic(true);
+    }, BOOT_MUSIC_LEAD_IN_MS);
+  }
+
+  function playBootMusic(restart = true) {
+    stopTitleMusic();
+    stopCgMusic();
+    stopOmakeMusic();
+    stopMusicMode(true);
+    if (!titleBgmEnabled()) {
+      stopBootMusic();
+      return;
+    }
+    if (restart) {
+      try { bootAudio.currentTime = 0; } catch (e) {}
+    }
+    const p = bootAudio.play();
+    if (p && typeof p.catch === "function") p.catch(() => {});
+  }
+
+  function stopCgMusic() {
+    try { cgAudio.pause(); } catch (e) {}
+  }
+
+  function stopOmakeMusic() {
+    try { omakeAudio.pause(); } catch (e) {}
+  }
+
+  function playOmakeMusic(restart = true) {
+    stopBootMusic();
+    stopTitleMusic();
+    stopCgMusic();
+    stopMusicMode(true);
+    if (!titleBgmEnabled()) {
+      stopOmakeMusic();
+      return;
+    }
+    if (restart) {
+      try { omakeAudio.currentTime = 0; } catch (e) {}
+    }
+    const p = omakeAudio.play();
+    if (p && typeof p.catch === "function") p.catch(() => {});
+  }
+
+  function playCgMusic(restart = true) {
+    stopBootMusic();
+    // CG mode exclusively owns the parent BGM while open.
+    stopOmakeMusic();
+    stopMusicMode(true);
+    stopTitleMusic();
+    if (!titleBgmEnabled()) {
+      stopCgMusic();
+      return;
+    }
+    if (restart) {
+      try { cgAudio.currentTime = 0; } catch (e) {}
+    }
+    const p = cgAudio.play();
+    if (p && typeof p.catch === "function") p.catch(() => {});
+  }
+
+  function playTitleMusic(restart = true) {
+    stopBootMusic();
+    // Parent-level BGM players are mutually exclusive.
+    stopOmakeMusic();
+    stopMusicMode(true);
+    stopCgMusic();
+    if (!titleBgmEnabled()) {
+      stopTitleMusic();
+      return;
+    }
+    if (restart) {
+      try { titleAudio.currentTime = 0; } catch (e) {}
+    }
+    const p = titleAudio.play();
+    if (p && typeof p.catch === "function") {
+      p.catch(() => {
+        // Chrome may reject autoplay when showTitle() was not entered from
+        // a direct user gesture. A later click/key on the title retries it.
+      });
+    }
+  }
+
+  function ping(eventName) {
+    const u = `ping.txt?sid=${encodeURIComponent(sid)}&event=${encodeURIComponent(eventName)}&t=${Date.now()}`;
+    fetch(u, { cache: "no-store", keepalive: true }).catch(() => {});
+  }
+
+  function showToast(text) {
+    clearTimeout(toastTimer);
+    toast.textContent = text;
+    toast.classList.add("show");
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 2300);
+  }
+
+  function cancelBootIntro() {
+    bootIntroToken++;
+    if (bootIntroFrame) cancelAnimationFrame(bootIntroFrame);
+    bootIntroFrame = 0;
+    cancelBootMusicCue();
+  }
+
+  function hideBootMenu() {
+    cancelBootIntro();
+    boot.style.display = "none";
+  }
+
+  function showBootMenu() {
+    TokiTitleFade.cancel();
+    cancelBootIntro();
+    stopBootMusic();
+    const token = bootIntroToken;
+    boot.classList.remove("boot-ready");
+    bootUi.inert = true;
+    bootUi.setAttribute("aria-hidden", "true");
+    bootLoading.removeAttribute("aria-hidden");
+    boot.style.display = "block";
+
+    let backgroundReady = false;
+    const background = new Image();
+    const reveal = () => {
+      if (backgroundReady) return;
+      backgroundReady = true;
+      if (token !== bootIntroToken || boot.style.display === "none") return;
+      // Paint the unchanged background and loading text before beginning
+      // the original two-second blend of the complete menu overlay.
+      bootIntroFrame = requestAnimationFrame(() => {
+        bootIntroFrame = requestAnimationFrame(() => {
+          bootIntroFrame = 0;
+          if (token !== bootIntroToken || boot.style.display === "none") return;
+          // The original MIDI first note is at 1.225s; the supplied MP3
+          // starts with audible samples, so restore that lead-in here.
+          scheduleBootMusic(token);
+          bootUi.inert = false;
+          bootUi.removeAttribute("aria-hidden");
+          bootLoading.setAttribute("aria-hidden", "true");
+          boot.classList.add("boot-ready");
+        });
+      });
+    };
+    background.onload = reveal;
+    background.onerror = reveal;
+    background.src = "assets/boot.jpg";
+    if (background.complete) reveal();
+  }
+
+  // fadeBase: colour the title fades in from ("#fff" after a white ending roll).
+  // Also used directly as a click handler, so anything else means the default black.
+  function showTitle(fadeBase) {
+    hideBootMenu();
+    exitScreen.style.display = "none";
+    runtimeScreen.style.display = "none";
+    runtimeFrame.src = "about:blank";
+    runtimeCover.hidden = true;
+    stopMusicMode(true);
+    hideTitleSpecial();
+    const background = renderTitle();
+    const config = readLegacyStorageSection("systemconfig");
+    TokiTitleFade.start(background, config.charAt(3) === "0" ? 0 : 2, fadeBase === "#fff" ? "#fff" : "", () => {
+      const debugPanel = document.getElementById("toki-debug-console");
+      if (!debugPanel || !debugPanel.contains(document.activeElement)) {
+        document.querySelector(".title-menu")?.focus({ preventScroll: true });
+      }
+    });
+    game.style.display = "block";
+    stopCgMusic();
+    playTitleMusic(true);
+  }
+
+  async function showFullscreenTitle() {
+    try {
+      await document.documentElement.requestFullscreen();
+    } catch (e) {
+      showToast("ブラウザのフルスクリーン許可が得られなかったため通常表示にします。");
+    }
+    showTitle();
+  }
+
+  function startGame(mode = "new") {
+    TokiTitleFade.cancel();
+    stopBootMusic();
+    hideBootMenu();
+    exitScreen.style.display = "none";
+
+    // Show an already-existing black parent layer BEFORE navigating the
+    // iframe. This masks Chrome's transient white about:blank/new-document
+    // paint while runtime.html and its CSS are being parsed.
+    runtimeCover.hidden = false;
+    runtimeScreen.style.display = "block";
+    game.style.display = "none";
+
+    runtimeFrame.src = `../sys/runtime.html?sid=${encodeURIComponent(sid)}&mode=${encodeURIComponent(mode)}&neko=${nekoMode?1:0}&ts=${Date.now()}`;
+  }
+
+  function showOmakeExtras() {
+    TokiTitleFade.cancel();
+    stopTitleMusic();
+    stopCgMusic();
+    stopMusicMode(true);
+
+    hideBootMenu();
+    game.style.display = "none";
+    runtimeScreen.style.display = "none";
+    runtimeFrame.src = "about:blank";
+    runtimeCover.hidden = true;
+    exitScreen.style.display = "none";
+
+    omakeCover.hidden = false;
+    omakeScreen.style.display = "block";
+
+    playOmakeMusic(true);
+    omakeFrame.src = `../omake/indexom.html?ts=${Date.now()}`;
+  }
+
+  function closeOmakeExtras() {
+    stopOmakeMusic();
+    omakeScreen.style.display = "none";
+    omakeFrame.src = "about:blank";
+    omakeCover.hidden = true;
+
+    game.style.display = "none";
+    runtimeScreen.style.display = "none";
+    exitScreen.style.display = "none";
+    showBootMenu();
+  }
+
+  function quitDemo() {
+    TokiTitleFade.cancel();
+    ping("close");
+    stopBootMusic();
+    stopTitleMusic();
+    stopCgMusic();
+    stopOmakeMusic();
+    stopMusicMode(true);
+    game.style.display = "none";
+    runtimeScreen.style.display = "none";
+    runtimeFrame.src = "about:blank";
+    omakeScreen.style.display = "none";
+    omakeFrame.src = "about:blank";
+    omakeCover.hidden = true;
+    runtimeCover.hidden = true;
+    hideBootMenu();
+    exitScreen.style.display = "block";
+    clearInterval(heartbeatTimer);
+  }
+
+  function demoAction(action) {
+    if (action === "new") { startGame("new"); return; }
+    if (action === "load") { startGame("load"); return; }
+    if (action === "ending") { showEndingList(); return; }
+    if (action === "kid") { showKidCheck(); return; }
+    if (action === "config") { showTitleConfig(); return; }
+    if (action === "debug") { showDebugMenu(); return; }
+    if (action === "omake") {
+      startGame("omake");
+      return;
+    }
+    if (action === "cg") {
+      showCGViewer();
+      return;
+    }
+    if (action === "music") {
+      showMusicViewer();
+      return;
+    }
+    if (action === "quit") { quitDemo(); return; }
+  }
+
+  omakeFrame.addEventListener("load", () => {
+    if (omakeScreen.style.display !== "block") return;
+    try {
+      if (omakeFrame.contentWindow.location.href === "about:blank") return;
+    } catch (e) {
+      return;
+    }
+    requestAnimationFrame(() => {
+      omakeCover.hidden = true;
+    });
+  });
+
+  runtimeFrame.addEventListener("load", () => {
+    if (runtimeScreen.style.display !== "block") return;
+
+    // Do not reveal an about:blank reset.
+    try {
+      const href = runtimeFrame.contentWindow.location.href;
+      if (href === "about:blank") return;
+    } catch (e) {
+      // Same-origin runtime is expected; if inspection somehow fails,
+      // keeping the cover is safer than exposing a white frame.
+      return;
+    }
+
+    // runtime.html has now parsed its CSS and owns its own fully black
+    // loading curtain. Parent cover can disappear instantly: black -> black.
+    requestAnimationFrame(() => {
+      runtimeCover.hidden = true;
+    });
+  });
+
+  document.getElementById("normal-button").addEventListener("click", showTitle);
+  document.getElementById("full-button").addEventListener("click", showFullscreenTitle);
+  document.getElementById("help-button").addEventListener("click", () => {
+    window.open("help/indexhlp.htm", "THELP", "width=800,height=650,scrollbars=yes,resizable=yes");
+  });
+  document.getElementById("omake-button").addEventListener("click", showOmakeExtras);
+  document.getElementById("close-button").addEventListener("click", quitDemo);
+
+  document.getElementById("title-cat-hotspot").addEventListener("click", () => {
+    nekoMode = !nekoMode;
+    showToast(nekoMode ? "ねこモードになったにゃ。" : "ねこモードを解除しました。");
+  });
+  document.getElementById("title-face-hotspot").addEventListener("click", () => {
+    titleBackground.style.backgroundImage = 'url("../bg/tback3.jpg")';
+    document.getElementById("title-face-hotspot").hidden = true;
+  });
+
+  debugBadge.addEventListener("click", () => {
+    if (DEBUG_MODE) showDebugMenu();
+  });
+
+  titleMenuList.addEventListener("click", ev => {
+    const el = ev.target.closest(".title-menu");
+    if (el) demoAction(el.dataset.action);
+  });
+  titleMenuList.addEventListener("keydown", ev => {
+    const el = ev.target.closest(".title-menu");
+    if (!el) return;
+    if (ev.key === "Enter" || ev.key === " ") {
+      ev.preventDefault();
+      demoAction(el.dataset.action);
+    }
+  });
+
+  document.addEventListener("keydown", ev => {
+    if (ev.key === "F1") {
+      ev.preventDefault();
+      window.open("help/indexhlp.htm", "THELP", "width=800,height=650,scrollbars=yes,resizable=yes");
+      return;
+    }
+    if (game.style.display !== "block") return;
+    if (gameUi.inert) return;
+
+    if (!titleSpecial.hidden) {
+      if (titleSpecialMode === "cg") {
+        if (ev.key === "0" || ev.key === "Escape" || ev.code === "Numpad0") {
+          ev.preventDefault();
+          cgBackAction();
+        }
+        return;
+      }
+
+      if (titleSpecialMode === "music") {
+        if (ev.key === "0" || ev.key === "Escape" || ev.code === "Numpad0") {
+          ev.preventDefault();
+          musicToTitle();
+        }
+        return;
+      }
+
+      if (ev.key === "0" || ev.key === "Escape") {
+        ev.preventDefault();
+        showTitle();
+      }
+      return;
+    }
+
+    const keyMap = {
+      "1":"new","2":"load","3":"omake","4":"cg","5":"music",
+      "6":"ending","7":"kid","8":"config","9":"quit","0":"debug"
+    };
+    const action = keyMap[ev.key];
+    if (action === "debug" && DEBUG_MODE) {
+      demoAction("debug");
+      return;
+    }
+    if (action && titleMenuList.querySelector(`[data-action="${action}"]`)) demoAction(action);
+  });
+
+  // v5.6.22: J and P held together on the title opens the hidden 攻略ジャンプ.
+  // Physical key codes, so the keyboard layout / IME state does not matter.
+  const guideJumpKeys = new Set();
+  document.addEventListener("keydown", ev => {
+    if (ev.code !== "KeyJ" && ev.code !== "KeyP") return;
+    guideJumpKeys.add(ev.code);
+    if (ev.repeat || guideJumpKeys.size < 2) return;
+    if (game.style.display !== "block" || gameUi.inert || !titleSpecial.hidden) return;
+    if (!(window.TOKIFURU_GUIDE_PRESETS || []).length) return;
+    ev.preventDefault();
+    guideJumpKeys.clear();
+    showGuideJump();
+  });
+  document.addEventListener("keyup", ev => guideJumpKeys.delete(ev.code));
+  window.addEventListener("blur", () => guideJumpKeys.clear());
+
+  window.addEventListener("message", ev => {
+    if (ev.origin !== location.origin) return;
+    if (!ev.data) return;
+
+    if (ev.data.type === "tokifuru-omake-close") {
+      closeOmakeExtras();
+      return;
+    }
+
+    if (ev.data.type === "tokifuru-omake-audio-unlock" && omakeScreen.style.display === "block") {
+      if (omakeAudio.paused) playOmakeMusic(false);
+      return;
+    }
+
+    if (ev.data.type === "tokifuru-demo3-runtime-audio") {
+      // Keep title.mp3 alive during runtime loading, then stop it at the
+      // exact point where the original scenario issues its first #m/stop.
+      stopTitleMusic();
+      return;
+    }
+
+    if (ev.data.type === "tokifuru-demo3-return-title") {
+      // v5.6.18: a white ending roll hands over its colour for the title fade.
+      showTitle(ev.data.base === "#fff" ? "#fff" : "");
+    }
+  });
+
+  function retryMenuMusicFromGesture() {
+    if (omakeScreen.style.display === "block") {
+      if (omakeAudio.paused) playOmakeMusic(false);
+      return;
+    }
+    if (boot.style.display !== "none" && exitScreen.style.display !== "block") {
+      if (bootMusicReady && bootAudio.paused) playBootMusic(false);
+      return;
+    }
+    // Retry the visible menu's BGM after a user gesture if autoplay was
+    // blocked. Special title screens keep their own audio ownership.
+    if (game.style.display !== "block") return;
+    if (!titleSpecial.hidden) return;
+    if (runtimeScreen.style.display === "block") return;
+    if (!cgAudio.paused) return;
+    if (!titleAudio.paused || !titleBgmEnabled()) return;
+    playTitleMusic(false);
+  }
+
+  document.addEventListener("pointerdown", retryMenuMusicFromGesture, { capture: true });
+  document.addEventListener("keydown", retryMenuMusicFromGesture, { capture: true });
+
+  titleSpecial.addEventListener("contextmenu", ev => {
+    ev.preventDefault();
+    if (titleSpecialMode === "cg") {
+      cgBackAction();
+      return;
+    }
+    if (titleSpecialMode === "music") {
+      musicToTitle();
+      return;
+    }
+    showTitle();
+  });
+
+  titleSpecial.addEventListener("wheel", ev => {
+    if (titleSpecialMode !== "music") return;
+    ev.preventDefault();
+    if (ev.deltaY > 0) musicNext();
+    else if (ev.deltaY < 0) musicBack();
+  }, { passive:false });
+
+  window.addEventListener("pagehide", () => {
+    TokiTitleFade.cancel();
+    cancelBootIntro();
+    stopBootMusic();
+    stopTitleMusic();
+    stopCgMusic();
+    stopOmakeMusic();
+    stopMusicMode(true);
+    ping("close");
+  });
+  const omakeTestCode = new URLSearchParams(location.search).get("testOmake");
+  // v5.6.19: launch notice. Pressing "ゲームスタート" is the user gesture that
+  // lets Chrome play the boot BGM (or the title BGM of the yukata launcher).
+  const launchNotice = document.getElementById("launch-notice");
+  const launchStartButton = document.getElementById("launch-start-button");
+  function notifyLaunch(phase, detail) {
+    document.dispatchEvent(new CustomEvent("tokifuru-launch-notice", { detail: { phase, detail } }));
+  }
+  function openFirstScreen() {
+    if (YUKATA_TITLE_MODE) showTitle();
+    else showBootMenu();
+  }
+  if (!YUKATA_TITLE_MODE) renderTitle();
+  if (omakeTestCode) {
+    // The development omake test starts the game at once; no notice.
+    launchNotice.hidden = true;
+    openFirstScreen();
+  } else {
+    launchStartButton.addEventListener("click", () => {
+      if (launchNotice.hidden) return;
+      launchNotice.hidden = true;
+      notifyLaunch("START", YUKATA_TITLE_MODE ? "浴衣タイトルへ" : "起動メニューへ");
+      openFirstScreen();
+    }, { once: true });
+    launchStartButton.focus({ preventScroll: true });
+    notifyLaunch("SHOW", "ゲームスタート待ち（BGMの自動再生制限を解除）");
+  }
+  if (omakeTestCode) {
+    // Development-only test entry. The supplied test BAT runs on port 8004,
+    // keeping this test origin/localStorage separate from the normal game.
+    setTimeout(() => startGame("omake-test:" + omakeTestCode), 0);
+  }
+
+  ping("open");
+  heartbeatTimer = setInterval(() => ping("alive"), 1500);
+})();
+</script>
+</body>
+</html>

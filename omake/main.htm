@@ -1,0 +1,37 @@
+<html><head>
+<meta charset="utf-8">
+<title>おまけインデックス</title>
+</head>
+<BODY TEXT="#000000" LINK="#000000" VLINK="#000000" oncontextmenu="return false" onselectstart="return false" style="overflow:hidden;">
+<div style="position:absolute;top:0px;left:0px"><img src="bg.jpg" width=640 height=476 usemap="#imaps" border=0></div>
+<map name="imaps" border=0>
+<area shape="rect" coords="198,176,481,210" href="JavaScript:gobbs()">
+<area shape="rect" coords="198,226,326,260" href="chapter00.htm">
+<area shape="rect" coords="198,276,358,306" href="dicf.htm">
+<area shape="rect" coords="198,318,362,353" href="./gaiden/main.htm">
+<area shape="rect" coords="198,366,420,400" href="tokuten.htm?v=5.6.6">
+<area shape="rect" coords="200,413,329,450" href="JavaScript:closeme()">
+</map>
+<script language="JavaScript">
+function unlockOmakeAudio()
+    {
+    top.postMessage({type:"tokifuru-omake-audio-unlock"}, location.origin);
+    }
+document.addEventListener("pointerdown", unlockOmakeAudio, {capture:true});
+document.addEventListener("keydown", unlockOmakeAudio, {capture:true});
+function gobbs()
+	{
+	a=confirm("インターネットに接続して、作者のnoteを表示します。\nよろしいですか？");
+	if (a)
+		{
+		window.open("https://note.com/so_nosg","_blank","noopener");
+		}
+	}
+function closeme()
+    {
+    top.postMessage({type:"tokifuru-omake-close"}, location.origin);
+    }
+</script>
+
+</BODY>
+</HTML>

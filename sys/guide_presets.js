@@ -1,0 +1,353 @@
+// v5.6.22: hidden "攻略ジャンプ" (title: hold J + P). For checking the normal version.
+// Each entry is exactly what the game's own Saveit() stores at the save point of
+// 時の故郷_全18ED_セーブ活用攻略.html (the text shown just before the choice).
+// Collected by auto-playing that walkthrough on v5.6.21 in Chromium; every one of
+// the 18 endings was reached by following the walkthrough from these states.
+// Loading goes through Loadit() like title -> 続きから; save slots are not touched.
+window.TOKIFURU_GUIDE_PRESETS = [
+ {
+  "id": "P01",
+  "no": "①",
+  "part": "本編",
+  "slot": 1,
+  "scene": "8月20日・夕方",
+  "next": "そのまま本編の共通ルートへ／休憩6回でセーブ2の地点",
+  "save": {
+   "page": "1",
+   "line": "60",
+   "lay0": "<img src='../bg/03\r.jpg' width='640' height='480' draggable='false'>",
+   "lay1": "",
+   "lay2": "",
+   "lay3": "",
+   "text": "<table width=596 height=80 border=0 cellpadding=0 cellspacing=0><tr><td valign=top><span style='font-size:18px;font-weight:bold;color:white;line-height:24px'><img src='blank.gif' width=64 height=32><br>８月２０日：夕方\r</span></td></tr></table>",
+   "name": "",
+   "music": "04\r",
+   "se": "06\r",
+   "hist": "<span style='font-size:18px;font-weight:bold;color:white;line-height:24px'>８月２０日：夕方\r<br>",
+   "flag": "000000000010000010001000000000000000000000000000000000000000000000000000000000000000000000000000",
+   "reg": "0004000002000000000000000000000000000000"
+  }
+ },
+ {
+  "id": "P02",
+  "no": "②",
+  "part": "本編",
+  "slot": 2,
+  "scene": "8月21日・夕方",
+  "next": "休憩14回→BadEnd 07／掃除→BadEnd 06",
+  "save": {
+   "page": "1",
+   "line": "61",
+   "lay0": "<img src='../bg/03\r.jpg' width='640' height='480' draggable='false'>",
+   "lay1": "",
+   "lay2": "",
+   "lay3": "",
+   "text": "<table width=596 height=80 border=0 cellpadding=0 cellspacing=0><tr><td valign=top><span style='font-size:18px;font-weight:bold;color:white;line-height:24px'><img src='blank.gif' width=64 height=32><br>８月２１日：夕方\r</span></td></tr></table>",
+   "name": "",
+   "music": "04\r",
+   "se": "06\r",
+   "hist": "<span style='font-size:18px;font-weight:bold;color:white;line-height:24px'>８月２１日：夕方\r<br>",
+   "flag": "000000000010000010001000000000010000000000000000000000000000000000000000000000000000000000000000",
+   "reg": "0104000002000000000000000000000000000000"
+  }
+ },
+ {
+  "id": "P03",
+  "no": "③",
+  "part": "本編",
+  "slot": 3,
+  "scene": "8月21日・昼　花火の誘い",
+  "next": "その日はちょっと…→BadEnd 05／あいてるよ→本筋",
+  "save": {
+   "page": "11",
+   "line": "131",
+   "lay0": "<img src='../bg/09\r.jpg' width='640' height='480' draggable='false'>",
+   "lay1": "",
+   "lay2": "",
+   "lay3": "<table border='0' width='640' height='480' cellspacing='0' cellpadding='0'><tr><td align='center' valign='bottom'><img src='../chr/0130\r.png' width='360' height='480' draggable='false'></td></tr></table>",
+   "text": "<table width=596 height=80 border=0 cellpadding=0 cellspacing=0><tr><td valign=top><span style='font-size:18px;font-weight:bold;color:white;line-height:24px'><img src='blank.gif' width=64 height=32><br>２３日の夜といえば…<br>俺がここに滞在する、最終日の夜だよな。<br>その日の予定は…\r</span></td></tr></table>",
+   "name": "",
+   "music": "off\r",
+   "se": "01\r",
+   "hist": "<span style='font-size:18px;font-weight:bold;color:white;line-height:24px'>２３日の夜といえば…<br>俺がここに滞在する、最終日の夜だよな。<br>その日の予定は…\r<br>",
+   "flag": "010000000010000010001000000000100000000010000000000000000000000000001010000000000000000000000000",
+   "reg": "0102010002000200000201000000000000000000"
+  }
+ },
+ {
+  "id": "P04",
+  "no": "④",
+  "part": "本編",
+  "slot": 1,
+  "scene": "8月22日・夕方　川辺",
+  "next": "様子を見る→本筋／早まるな→GoodEnd 05",
+  "save": {
+   "page": "26",
+   "line": "77",
+   "lay0": "<img src='../bg/35\r.jpg' width='640' height='480' draggable='false'>",
+   "lay1": "",
+   "lay2": "",
+   "lay3": "<table border='0' width='640' height='480' cellspacing='0' cellpadding='0'><tr><td align='center' valign='bottom'><img src='../chr/0000.png' width='360' height='480' draggable='false'></td></tr></table>",
+   "text": "<table width=596 height=80 border=0 cellpadding=0 cellspacing=0><tr><td valign=top><span style='font-size:18px;font-weight:bold;color:white;line-height:24px'><img src='blank.gif' width=64 height=32><br>まさか…まさかとは思うけど。<br>靴をそろえて脱いで、川のほとりに立ってるってことは……！！\r</span></td></tr></table>",
+   "name": "",
+   "music": "12\r",
+   "se": "39\r",
+   "hist": "<span style='font-size:18px;font-weight:bold;color:white;line-height:24px'>まさか…まさかとは思うけど。<br>靴をそろえて脱いで、川のほとりに立ってるってことは……！！\r<br>",
+   "flag": "011011001010000010001110010010000000000011000000000000000000000000000111101101100000000000000000",
+   "reg": "0204030002000501020302000000000000000000"
+  }
+ },
+ {
+  "id": "P05",
+  "no": "⑤",
+  "part": "本編",
+  "slot": 2,
+  "scene": "8月23日・朝　電話後の判断",
+  "next": "推理9問→本筋／嘘だ→BadEnd 03",
+  "save": {
+   "page": "13",
+   "line": "99",
+   "lay0": "<img src='../bg/02\r.jpg' width='640' height='480' draggable='false'>",
+   "lay1": "",
+   "lay2": "",
+   "lay3": "<table border='0' width='640' height='480' cellspacing='0' cellpadding='0'><tr><td align='center' valign='bottom'><img src='../chr/0000.png' width='360' height='480' draggable='false'></td></tr></table>",
+   "text": "<table width=596 height=80 border=0 cellpadding=0 cellspacing=0><tr><td valign=top><span style='font-size:18px;font-weight:bold;color:white;line-height:24px'><img src='blank.gif' width=64 height=32><br>それでも、俺は一つだけ確信していることがあった。<br>俺が確信していること、それは……\r</span></td></tr></table>",
+   "name": "",
+   "music": "off\r",
+   "se": "01\r",
+   "hist": "<span style='font-size:18px;font-weight:bold;color:white;line-height:24px'>それでも、俺は一つだけ確信していることがあった。<br>俺が確信していること、それは……\r<br>",
+   "flag": "011111001110000010001110010010000000000011000000001000001000000000000111101101100000000000000001",
+   "reg": "0301030002000501020500000000000000000000"
+  }
+ },
+ {
+  "id": "P06",
+  "no": "⑥",
+  "part": "本編",
+  "slot": 3,
+  "scene": "8月23日・夜　花火へ行くか",
+  "next": "やはり行けない→BadEnd 04",
+  "save": {
+   "page": "14",
+   "line": "630",
+   "lay0": "<img src='../bg/04\r.jpg' width='640' height='480' draggable='false'>",
+   "lay1": "",
+   "lay2": "",
+   "lay3": "<table border='0' width='640' height='480' cellspacing='0' cellpadding='0'><tr><td align='center' valign='bottom'><img src='../chr/0000.png' width='360' height='480' draggable='false'></td></tr></table>",
+   "text": "<table width=596 height=80 border=0 cellpadding=0 cellspacing=0><tr><td valign=top><span style='font-size:18px;font-weight:bold;color:white;line-height:24px'><img src='blank.gif' width=64 height=32><br>…俺はどうすればいいんだろう。<br>彼女は、俺との約束のためにこの世界に現れた。<br>この約束を果たせば、この世から消えていなくなってしまうかもしれないんだぞ…\r</span></td></tr></table>",
+   "name": "",
+   "music": "05\r",
+   "se": "02\r",
+   "hist": "<span style='font-size:18px;font-weight:bold;color:white;line-height:24px'>…俺はどうすればいいんだろう。<br>彼女は、俺との約束のためにこの世界に現れた。<br>この約束を果たせば、この世から消えていなくなってしまうかもしれないんだぞ…\r<br>",
+   "flag": "011111001110000010001110010011010000000011010000001000111000000000001001101101100000000000000001",
+   "reg": "0305030002000501020500000000000000000000"
+  }
+ },
+ {
+  "id": "P07",
+  "no": "⑦",
+  "part": "本編",
+  "slot": 3,
+  "scene": "花火　告白の前",
+  "next": "来年もまた来よう→BadEnd 02",
+  "save": {
+   "page": "14",
+   "line": "173",
+   "lay0": "<img src='../bg/28\r.jpg' width='640' height='480' draggable='false'>",
+   "lay1": "",
+   "lay2": "",
+   "lay3": "<table border='0' width='640' height='480' cellspacing='0' cellpadding='0'><tr><td align='center' valign='bottom'><img src='../chr/0000.png' width='360' height='480' draggable='false'></td></tr></table>",
+   "text": "<table width=596 height=80 border=0 cellpadding=0 cellspacing=0><tr><td valign=top><span style='font-size:18px;font-weight:bold;color:white;line-height:24px'><img src='blank.gif' width=64 height=32><br>俺は……<br>俺は、ゆり子に……\r</span></td></tr></table>",
+   "name": "",
+   "music": "10\r",
+   "se": "off\r",
+   "hist": "<span style='font-size:18px;font-weight:bold;color:white;line-height:24px'>俺は……<br>俺は、ゆり子に……\r<br>",
+   "flag": "011111001110000010001110010011010000000011010000001000111000000000001011101101100000000000000001",
+   "reg": "0305030002000501020600000000000000000000"
+  }
+ },
+ {
+  "id": "P08",
+  "no": "⑧",
+  "part": "本編",
+  "slot": 3,
+  "scene": "別れの返答の前",
+  "next": "悲しい思いをさせたくない→GoodEnd 04",
+  "save": {
+   "page": "14",
+   "line": "295",
+   "lay0": "<img src='../bg/28\r.jpg' width='640' height='480' draggable='false'>",
+   "lay1": "",
+   "lay2": "",
+   "lay3": "<table border='0' width='640' height='480' cellspacing='0' cellpadding='0'><tr><td align='center' valign='bottom'><img src='../chr/0157\r.png' width='360' height='480' draggable='false'></td></tr></table>",
+   "text": "<table width=596 height=80 border=0 cellpadding=0 cellspacing=0><tr><td valign=top><span style='font-size:18px;font-weight:bold;color:white;line-height:24px'><img src='blank.gif' width=64 height=32><br>そんな彼女に、俺は……\r</span></td></tr></table>",
+   "name": "",
+   "music": "15\r",
+   "se": "off\r",
+   "hist": "<span style='font-size:18px;font-weight:bold;color:white;line-height:24px'>そんな彼女に、俺は……\r<br>",
+   "flag": "011111001110000010001110010011010000000011010000001000111000000000001011101101100000000000000001",
+   "reg": "0305030002000501020600000000000000000000"
+  }
+ },
+ {
+  "id": "P09",
+  "no": "⑨",
+  "part": "本編",
+  "slot": 3,
+  "scene": "消滅のあと",
+  "next": "さよなら→GoodEnd 03／まだだ→最終章",
+  "save": {
+   "page": "14",
+   "line": "461",
+   "lay0": "<img src='../bg/28\r.jpg' width='640' height='480' draggable='false'>",
+   "lay1": "",
+   "lay2": "",
+   "lay3": "<table border='0' width='640' height='480' cellspacing='0' cellpadding='0'><tr><td align='center' valign='bottom'><img src='../chr/0000.png' width='360' height='480' draggable='false'></td></tr></table>",
+   "text": "<table width=596 height=80 border=0 cellpadding=0 cellspacing=0><tr><td valign=top><span style='font-size:18px;font-weight:bold;color:white;line-height:24px'><img src='blank.gif' width=64 height=32><br>彼女は消滅した。<br><br>俺の腕の中から…<br>いなくなってしまったんだ……\r</span></td></tr></table>",
+   "name": "",
+   "music": "15\r",
+   "se": "off\r",
+   "hist": "<span style='font-size:18px;font-weight:bold;color:white;line-height:24px'>彼女は消滅した。<br><br>俺の腕の中から…<br>いなくなってしまったんだ……\r<br>",
+   "flag": "011111001110000010001110010011010000000011010000001000111000000000001011101101100000000000000001",
+   "reg": "0305030002000501020600000000000000000000"
+  }
+ },
+ {
+  "id": "P10",
+  "no": "⑩",
+  "part": "本編",
+  "slot": 3,
+  "scene": "最終章　最後の電話の前",
+  "next": "澤田運輸→GoodEnd 01／警察→02／ゆり子の家→BadEnd 01",
+  "save": {
+   "page": "50",
+   "line": "558",
+   "lay0": "<img src='../bg/02\r.jpg' width='640' height='480' draggable='false'>",
+   "lay1": "",
+   "lay2": "",
+   "lay3": "<table border='0' width='640' height='480' cellspacing='0' cellpadding='0'><tr><td align='center' valign='bottom'><img src='../chr/0000.png' width='360' height='480' draggable='false'></td></tr></table>",
+   "text": "<table width=596 height=80 border=0 cellpadding=0 cellspacing=0><tr><td valign=top><span style='font-size:18px;font-weight:bold;color:white;line-height:24px'><img src='blank.gif' width=64 height=32><br>こうなったら、最後の手段だ。<br>ゆり子を救うために、俺は……！！\r</span></td></tr></table>",
+   "name": "",
+   "music": "13\r",
+   "se": "45\r",
+   "hist": "<span style='font-size:18px;font-weight:bold;color:white;line-height:24px'>こうなったら、最後の手段だ。<br>ゆり子を救うために、俺は……！！\r<br>",
+   "flag": "011111001110000010001110010011111101001111010000001000111000000000001001111111100000000000000001",
+   "reg": "0304000002000501020600000000000000000000"
+  }
+ },
+ {
+  "id": "P11",
+  "no": "⑪",
+  "part": "追加編",
+  "slot": 1,
+  "scene": "部屋の片付け",
+  "next": "また明日に→BadEnd B1",
+  "save": {
+   "page": "30",
+   "line": "136",
+   "lay0": "<img src='../bg/37\r.jpg' width='640' height='480' draggable='false'>",
+   "lay1": "",
+   "lay2": "",
+   "lay3": "<table border='0' width='640' height='480' cellspacing='0' cellpadding='0'><tr><td align='center' valign='bottom'><img src='../chr/0180\r.png' width='360' height='480' draggable='false'></td></tr></table>",
+   "text": "<table width=596 height=80 border=0 cellpadding=0 cellspacing=0><tr><td valign=top><span style='font-size:18px;font-weight:bold;color:white;line-height:24px'><img src='blank.gif' width=64 height=32><br>今の俺の部屋…女の子に見せられる状態じゃないぞッ！？<br>あんな部屋を見られたら、いかにゆり子とはいえ幻滅モノだッ！<br>何とかしなければ……！！\r</span></td></tr></table>",
+   "name": "",
+   "music": "17\r",
+   "se": "45\r",
+   "hist": "<span style='font-size:18px;font-weight:bold;color:white;line-height:24px'>今の俺の部屋…女の子に見せられる状態じゃないぞッ！？<br>あんな部屋を見られたら、いかにゆり子とはいえ幻滅モノだッ！<br>何とかしなければ……！！\r<br>",
+   "flag": "000000000010000010001000000000100000000000000000000000000000000000000100000000001000000000000000",
+   "reg": "0002000000000000000000000000000000000000"
+  }
+ },
+ {
+  "id": "P12",
+  "no": "⑫",
+  "part": "追加編",
+  "slot": 1,
+  "scene": "病院",
+  "next": "仮眠をとる→BadEnd B2",
+  "save": {
+   "page": "31",
+   "line": "25",
+   "lay0": "<img src='../bg/65\r.jpg' width='640' height='480' draggable='false'>",
+   "lay1": "",
+   "lay2": "",
+   "lay3": "<table border='0' width='640' height='480' cellspacing='0' cellpadding='0'><tr><td align='center' valign='bottom'><img src='../chr/0000.png' width='360' height='480' draggable='false'></td></tr></table>",
+   "text": "<table width=596 height=80 border=0 cellpadding=0 cellspacing=0><tr><td valign=top><span style='font-size:18px;font-weight:bold;color:white;line-height:24px'><img src='blank.gif' width=64 height=32><br>ここは、どうしようかな……？\r</span></td></tr></table>",
+   "name": "",
+   "music": "26\r",
+   "se": "off\r",
+   "hist": "<span style='font-size:18px;font-weight:bold;color:white;line-height:24px'>ここは、どうしようかな……？\r<br>",
+   "flag": "011000000000000010001000000000100000000000000000000000000000000000000100000000001000000000000000",
+   "reg": "0002000000000000000000000000000000000000"
+  }
+ },
+ {
+  "id": "P13",
+  "no": "⑬",
+  "part": "追加編",
+  "slot": 1,
+  "scene": "里山村　隠れ場所",
+  "next": "台所→BadEnd B3／書斎→本筋",
+  "save": {
+   "page": "32",
+   "line": "148",
+   "lay0": "<img src='../bg/106\r.jpg' width='640' height='480' draggable='false'>",
+   "lay1": "",
+   "lay2": "",
+   "lay3": "<table border='0' width='640' height='480' cellspacing='0' cellpadding='0'><tr><td align='center' valign='bottom'><img src='../chr/0000.png' width='360' height='480' draggable='false'></td></tr></table>",
+   "text": "<table width=596 height=80 border=0 cellpadding=0 cellspacing=0><tr><td valign=top><span style='font-size:18px;font-weight:bold;color:white;line-height:24px'><img src='blank.gif' width=64 height=32><br>…考えるのは後だ。<br>とにかく今は、どこかへ逃げなければ。<br>この家の中で、安全な隠れ場所とは……\r</span></td></tr></table>",
+   "name": "",
+   "music": "23\r",
+   "se": "41\r",
+   "hist": "<span style='font-size:18px;font-weight:bold;color:white;line-height:24px'>…考えるのは後だ。<br>とにかく今は、どこかへ逃げなければ。<br>この家の中で、安全な隠れ場所とは……\r<br>",
+   "flag": "011101111010000010001000000000100000000000000000000000000000000000000100000000001000000000000000",
+   "reg": "0002000000000000000000000000000000000000"
+  }
+ },
+ {
+  "id": "P14",
+  "no": "⑭",
+  "part": "追加編",
+  "slot": 1,
+  "scene": "少女への質問の前",
+  "next": "観察から→GoodEnd B1／質問3つ→セーブ2の地点",
+  "save": {
+   "page": "32",
+   "line": "224",
+   "lay0": "<img src='../bg/201\r.jpg' width='640' height='480' draggable='false'>",
+   "lay1": "",
+   "lay2": "",
+   "lay3": "<table border='0' width='640' height='480' cellspacing='0' cellpadding='0'><tr><td align='center' valign='bottom'><img src='../chr/0000.png' width='360' height='480' draggable='false'></td></tr></table>",
+   "text": "<table width=596 height=80 border=0 cellpadding=0 cellspacing=0><tr><td valign=top><span style='font-size:18px;font-weight:bold;color:white;line-height:24px'><img src='blank.gif' width=64 height=32><br>整理しながら、少しずつ考えていかなきゃな。<br>そこで、俺は……\r</span></td></tr></table>",
+   "name": "",
+   "music": "11\r",
+   "se": "off\r",
+   "hist": "<span style='font-size:18px;font-weight:bold;color:white;line-height:24px'>整理しながら、少しずつ考えていかなきゃな。<br>そこで、俺は……\r<br>",
+   "flag": "011101111010000010001000000000100000000000000000000000000000000000000100000000001000000000000000",
+   "reg": "0002000000000000000000000000000000000000"
+  }
+ },
+ {
+  "id": "P15",
+  "no": "⑮",
+  "part": "追加編",
+  "slot": 2,
+  "scene": "囮の返答",
+  "next": "頼むよ→BadEnd B4／囮は俺→GoodEnd B2",
+  "save": {
+   "page": "32",
+   "line": "382",
+   "lay0": "<img src='../bg/08\r.jpg' width='640' height='480' draggable='false'>",
+   "lay1": "",
+   "lay2": "",
+   "lay3": "<table border='0' width='640' height='480' cellspacing='0' cellpadding='0'><tr><td align='center' valign='bottom'><img src='../chr/0293\r.png' width='360' height='480' draggable='false'></td></tr></table>",
+   "text": "<table width=596 height=80 border=0 cellpadding=0 cellspacing=0><tr><td valign=top><span style='font-size:18px;font-weight:bold;color:white;line-height:24px'><img src='blank.gif' width=64 height=32><br>俺は、彼女に返答した。\r</span></td></tr></table>",
+   "name": "",
+   "music": "19\r",
+   "se": "off\r",
+   "hist": "<span style='font-size:18px;font-weight:bold;color:white;line-height:24px'>俺は、彼女に返答した。\r<br>",
+   "flag": "011101111010110110001000000000100000000000000000000000000000000000000100000000001000000000000000",
+   "reg": "0002000000000000000000000000000000000000"
+  }
+ }
+];
